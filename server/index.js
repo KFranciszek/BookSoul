@@ -11,7 +11,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 
@@ -65,6 +65,19 @@ const limiter = rateLimit({
   }
 });
 app.use(limiter);
+
+/* ----------  FRONTEND (React)  ---------- */
+const clientPath = join(__dirname, '..', 'dist');   //  <- upewnij się, że dist/ leży obok server/
+
+// 1️⃣  statyczne pliki Reacta
+app.use(express.static(clientPath, { index: false }));
+
+// 2️⃣  fallback SPA – KAŻDA ścieżka, która NIE zaczyna się od /api/,
+//    zwraca index.html, aby React Router obsłużył routowanie
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(join(clientPath, 'index.html'));
+});
 
 // Body parsing middleware with larger limits
 app.use(express.json({ limit: '50mb' }));
