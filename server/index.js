@@ -11,7 +11,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 
@@ -44,7 +44,7 @@ app.use(helmet({
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.FRONTEND_URL 
+    ? ['https://your-frontend-domain.com', process.env.FRONTEND_URL] 
     : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:3000', 'http://127.0.0.1:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -55,13 +55,13 @@ app.use(cors({
 // Rate limiting - more generous limits
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 200, // Zwiększony limit
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 200,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
     // Skip rate limiting for health checks
-    return req.path === '/api/health';
+    return req.path === '/api/health' || req.path === '/' || req.path === '/health';
   }
 });
 app.use(limiter);
@@ -86,7 +86,75 @@ app.use((req, res, next) => {
   next();
 });
 
-// Health check endpoint with more detailed info
+// ROOT ENDPOINT - for Render health check
+app.get('/', (req, res) => {
+  res.json({
+    status: 'healthy',
+    service: 'BookSoul AI Recommendation API',
+    version: '1.0.0',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    message: 'BookSoul Backend API is running successfully!',
+    endpoints: {
+      health: '/api/health',
+      recommendations: '/api/recommendations/generate',
+      optimizedRecommendations: '/api/recommendations-optimized/generate',
+      sessions: '/api/sessions/create'
+    },
+    documentation: 'This is the backend API for BookSoul - AI-powered book recommendations'
+  });
+});
+
+// HEALTH CHECK endpoint - more detailed
+app.get('/health', async (req, res) => {
+  try {
+    const health = {
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      features: {
+        optimized_pipeline: true,
+        performance_monitoring: true,
+        intelligent_caching: true,
+        ai_only_mode: true,
+        sentry_monitoring: !!process.env.SENTRY_DSN
+      },
+      system: {
+        uptime: process.uptime(),
+        memory: process.memoryUsage(),
+        node_version: process.version,
+        port: PORT
+      }
+    };
+
+    // Quick OpenAI connectivity check
+    try {
+      const { OpenAIService } = await import('./services/OpenAIService.js');
+      const openai = new OpenAIService();
+      health.services = {
+        openai: openai.isServiceAvailable() ? 'available' : 'unavailable',
+        sentry: !!process.env.SENTRY_DSN ? 'configured' : 'not_configured'
+      };
+    } catch (error) {
+      health.services = {
+        openai: 'error',
+        sentry: !!process.env.SENTRY_DSN ? 'configured' : 'not_configured'
+      };
+    }
+
+    res.json(health);
+  } catch (error) {
+    logger.error('Health check failed:', error);
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+// API Health check endpoint (legacy)
 app.get('/api/health', async (req, res) => {
   try {
     const health = {
@@ -197,10 +265,10 @@ const startServer = async () => {
     // Our custom error handling middleware
     app.use(errorHandler);
 
-    // 404 handler
-    app.use('*', (req, res) => {
+    // 404 handler - UPDATED to not conflict with root endpoint
+    app.use('/api/*', (req, res) => {
       res.status(404).json({ 
-        error: 'Route not found',
+        error: 'API route not found',
         path: req.originalUrl,
         availableRoutes: [
           '/api/health',
@@ -237,6 +305,14 @@ const startServer = async () => {
       logger.info(`✅ Server is ready to accept connections`);
       logger.info(`🔥 Performance optimizations: ACTIVE`);
       logger.info(`⏱️ Request timeout: 5 minutes for AI processing`);
+      
+      // Log available endpoints
+      logger.info(`📍 Available endpoints:`);
+      logger.info(`   GET  /           - Root endpoint (health check)`);
+      logger.info(`   GET  /health     - Health check`);
+      logger.info(`   GET  /api/health - API health check`);
+      logger.info(`   POST /api/recommendations/generate - Generate recommendations`);
+      logger.info(`   POST /api/recommendations-optimized/generate - Optimized recommendations`);
     });
 
     // Handle server errors

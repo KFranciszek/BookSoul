@@ -19,61 +19,80 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { language } = useAppContext();
 
-  // LOGGING: Track prop changes
+  // PRODUCTION-SAFE: Only log in development
   useEffect(() => {
-    console.log(`🎯 RatingComponent [${bookId}] - Props changed:`, {
-      currentRating,
-      disabled,
-      isSubmitting,
-      timestamp: new Date().toISOString()
-    });
+    if (import.meta.env.DEV) {
+      console.log(`🎯 RatingComponent [${bookId}] - Props changed:`, {
+        currentRating,
+        disabled,
+        isSubmitting,
+        timestamp: new Date().toISOString()
+      });
+    }
   }, [currentRating, disabled, isSubmitting, bookId]);
 
-  // LOGGING: Track component renders
   useEffect(() => {
-    console.log(`🔄 RatingComponent [${bookId}] - Component rendered`, {
-      currentRating,
-      isSubmitting,
-      disabled
-    });
+    if (import.meta.env.DEV) {
+      console.log(`🔄 RatingComponent [${bookId}] - Component rendered`, {
+        currentRating,
+        isSubmitting,
+        disabled
+      });
+    }
   });
 
   const handleRatingClick = async (rating: number) => {
-    console.log(`👆 RatingComponent [${bookId}] - Rating clicked:`, {
-      rating,
-      currentRating,
-      disabled,
-      isSubmitting,
-      canProceed: !disabled && !isSubmitting
-    });
+    if (import.meta.env.DEV) {
+      console.log(`👆 RatingComponent [${bookId}] - Rating clicked:`, {
+        rating,
+        currentRating,
+        disabled,
+        isSubmitting,
+        canProceed: !disabled && !isSubmitting
+      });
+    }
 
     if (disabled || isSubmitting) {
-      console.log(`🚫 RatingComponent [${bookId}] - Click blocked:`, { disabled, isSubmitting });
+      if (import.meta.env.DEV) {
+        console.log(`🚫 RatingComponent [${bookId}] - Click blocked:`, { disabled, isSubmitting });
+      }
       return;
     }
     
-    console.log(`⏳ RatingComponent [${bookId}] - Setting isSubmitting to true`);
+    if (import.meta.env.DEV) {
+      console.log(`⏳ RatingComponent [${bookId}] - Setting isSubmitting to true`);
+    }
     setIsSubmitting(true);
     
     try {
-      console.log(`📤 RatingComponent [${bookId}] - Calling onRatingChange with rating:`, rating);
+      if (import.meta.env.DEV) {
+        console.log(`📤 RatingComponent [${bookId}] - Calling onRatingChange with rating:`, rating);
+      }
       await onRatingChange(bookId, rating);
-      console.log(`✅ RatingComponent [${bookId}] - onRatingChange completed successfully`);
+      if (import.meta.env.DEV) {
+        console.log(`✅ RatingComponent [${bookId}] - onRatingChange completed successfully`);
+      }
     } catch (error) {
-      console.error(`❌ RatingComponent [${bookId}] - onRatingChange failed:`, error);
+      if (import.meta.env.DEV) {
+        console.error(`❌ RatingComponent [${bookId}] - onRatingChange failed:`, error);
+      }
     } finally {
-      console.log(`✅ RatingComponent [${bookId}] - Setting isSubmitting to false`);
+      if (import.meta.env.DEV) {
+        console.log(`✅ RatingComponent [${bookId}] - Setting isSubmitting to false`);
+      }
       setIsSubmitting(false);
     }
   };
 
   const getRatingConfig = (rating: number) => {
     const isSelected = currentRating === rating;
-    console.log(`🎨 RatingComponent [${bookId}] - Getting config for rating ${rating}:`, {
-      currentRating,
-      isSelected,
-      isSubmitting
-    });
+    if (import.meta.env.DEV) {
+      console.log(`🎨 RatingComponent [${bookId}] - Getting config for rating ${rating}:`, {
+        currentRating,
+        isSelected,
+        isSubmitting
+      });
+    }
 
     const configs = {
       0: {
@@ -108,12 +127,14 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
           const Icon = config.icon;
           const isSelected = currentRating === rating;
           
-          console.log(`🔘 RatingComponent [${bookId}] - Rendering button ${rating}:`, {
-            isSelected,
-            currentRating,
-            color: config.color,
-            disabled: disabled || isSubmitting
-          });
+          if (import.meta.env.DEV) {
+            console.log(`🔘 RatingComponent [${bookId}] - Rendering button ${rating}:`, {
+              isSelected,
+              currentRating,
+              color: config.color,
+              disabled: disabled || isSubmitting
+            });
+          }
           
           return (
             <button

@@ -4,7 +4,7 @@ import { AppProvider, useAppContext } from './contexts/AppContext';
 import LandingPage from './components/LandingPage';
 import Survey from './components/Survey';
 import Recommendations from './components/Recommendations';
-import TestConnection from './components/TestConnection';
+import ErrorBoundary from './components/ErrorBoundary';
 
 const AppContent: React.FC = () => {
   const { currentStep } = useAppContext();
@@ -23,11 +23,9 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <>
+    <ErrorBoundary>
       {renderCurrentStep()}
-      {/* Show connection test only in development */}
-      {import.meta.env.DEV && <TestConnection />}
-    </>
+    </ErrorBoundary>
   );
 };
 

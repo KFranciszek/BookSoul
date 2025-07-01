@@ -3,107 +3,67 @@ import { ArrowLeft, Sparkles, Heart, RefreshCw, Brain, Target, Film } from 'luci
 import { useAppContext } from '../contexts/AppContext';
 import { t } from '../utils/translations';
 import RecommendationCard from './RecommendationCard';
-import { recommendationAPI } from '../services/api';
+import SkeletonCard from './SkeletonCard';
+import { useRatings } from '../hooks/useRatings';
 
 const Recommendations: React.FC = () => {
   const { recommendations, setCurrentStep, language, surveyData, sessionId, setSessionId } = useAppContext();
-  const [userRatings, setUserRatings] = React.useState<Record<string, number>>({});
-
-  // LOGGING: Track userRatings state changes
-  React.useEffect(() => {
-    console.log(`📊 Recommendations - userRatings state changed:`, {
-      userRatings,
-      ratingsCount: Object.keys(userRatings).length,
-      timestamp: new Date().toISOString()
-    });
-  }, [userRatings]);
-
-  // LOGGING: Track component renders
-  React.useEffect(() => {
-    console.log(`🔄 Recommendations - Component rendered:`, {
-      recommendationsCount: recommendations.length,
-      sessionId,
-      userRatingsCount: Object.keys(userRatings).length
-    });
-  });
+  const { userRatings, submitRating } = useRatings();
 
   const handleRatingChange = async (bookId: string, rating: number) => {
-    console.log(`🎯 Recommendations - handleRatingChange called:`, {
-      bookId,
-      rating,
-      sessionId,
-      currentUserRatings: userRatings,
-      timestamp: new Date().toISOString()
-    });
-
     if (!sessionId) {
-      console.warn('⚠️ Recommendations - No session ID available for rating');
+      if (import.meta.env.DEV) {
+        console.warn('⚠️ No session ID available for rating');
+      }
       return;
     }
 
     try {
-      console.log(`⏳ Recommendations - Updating local state for ${bookId} = ${rating}`);
-      
-      // Update local state immediately for better UX
-      setUserRatings(prev => {
-        const newRatings = {
-          ...prev,
-          [bookId]: rating
-        };
-        console.log(`📝 Recommendations - Local state updated:`, {
-          previousRatings: prev,
-          newRatings,
-          bookId,
-          rating
-        });
-        return newRatings;
-      });
-
-      console.log(`📤 Recommendations - Submitting rating to API: ${bookId} = ${rating}`);
-      
-      // Submit rating to backend
-      await recommendationAPI.submitRating(sessionId, bookId, rating);
-      
-      console.log(`✅ Recommendations - Rating submitted successfully: ${bookId} = ${rating}`);
-      
+      await submitRating(sessionId, bookId, rating);
     } catch (error) {
-      console.error(`❌ Recommendations - Failed to submit rating:`, {
-        bookId,
-        rating,
-        error: error instanceof Error ? error.message : error
-      });
-      
-      console.log(`🔄 Recommendations - Reverting local state for ${bookId}`);
-      
-      // Revert local state on error
-      setUserRatings(prev => {
-        const newRatings = { ...prev };
-        delete newRatings[bookId];
-        console.log(`↩️ Recommendations - Local state reverted:`, {
-          previousRatings: prev,
-          newRatings,
-          removedBookId: bookId
-        });
-        return newRatings;
-      });
+      // Error handling is done in the hook
       throw error;
     }
   };
 
   const handleStartOver = () => {
-    console.log(`🔄 Recommendations - Starting over`);
     setCurrentStep(0);
     setSessionId(null);
-    setUserRatings({});
   };
 
   const handleBackToSurvey = () => {
-    console.log(`⬅️ Recommendations - Going back to survey`);
     setCurrentStep(1);
   };
 
   const isQuickMode = surveyData.surveyMode === 'quick';
   const isCinemaMode = surveyData.surveyMode === 'cinema';
+
+  // Show skeleton loading if no recommendations yet
+  if (!recommendations || recommendations.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center mb-6">
+              <Sparkles className="w-12 h-12 text-orange-500 mr-4" />
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-800">
+                {t('recommendationsTitle', language)}
+              </h1>
+            </div>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              {t('aiProcessingInProgress', language)}
+            </p>
+          </div>
+          
+          <div className="space-y-8">
+            {[1, 2, 3].map((i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 py-8 px-4">
@@ -171,24 +131,14 @@ const Recommendations: React.FC = () => {
 
         {/* Recommendations Grid */}
         <div className="space-y-8 mb-12">
-          {recommendations.map((book) => {
-            const currentRating = userRatings[book.id];
-            
-            console.log(`🎨 Recommendations - Rendering card for ${book.id}:`, {
-              bookTitle: book.title,
-              currentRating,
-              hasRating: currentRating !== undefined
-            });
-            
-            return (
-              <RecommendationCard 
-                key={book.id} 
-                book={book} 
-                onRatingChange={handleRatingChange}
-                currentRating={currentRating}
-              />
-            );
-          })}
+          {recommendations.map((book) => (
+            <RecommendationCard 
+              key={book.id} 
+              book={book} 
+              onRatingChange={handleRatingChange}
+              currentRating={userRatings[book.id]}
+            />
+          ))}
         </div>
 
         {/* Action Buttons */}

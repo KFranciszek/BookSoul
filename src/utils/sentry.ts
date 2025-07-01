@@ -33,14 +33,13 @@ export const initSentry = () => {
     replaysSessionSampleRate: environment === 'production' ? 0.1 : 1.0,
     replaysOnErrorSampleRate: 1.0,
     
-    // CRITICAL: Enable debug mode to see what's being sent
-    debug: true, // ZAWSZE TRUE dla debugowania
+    // PRODUCTION-SAFE: Disable debug mode in production
+    debug: environment === 'development',
     
     // Error filtering
     beforeSend(event, hint) {
-      // TEMPORARILY DISABLE FILTERING to see all events
+      // Only log debug info in development
       if (environment === 'development') {
-        // Log what we're sending to Sentry
         console.log('🔍 Frontend Sentry Event:', {
           type: event.type,
           level: event.level,
@@ -50,7 +49,7 @@ export const initSentry = () => {
         });
       }
       
-      // Filter out development errors in production ONLY
+      // Filter out development errors in production
       if (environment === 'production') {
         // Don't send console errors in production
         if (event.exception?.values?.[0]?.value?.includes('Non-Error promise rejection')) {
@@ -84,9 +83,8 @@ export const initSentry = () => {
     maxBreadcrumbs: 50,
     attachStacktrace: true,
     
-    // CRITICAL: Ensure all message levels are captured
+    // PRODUCTION-SAFE: Only log breadcrumbs in development
     beforeBreadcrumb(breadcrumb) {
-      // Log breadcrumbs in development
       if (environment === 'development') {
         console.log('🍞 Frontend Sentry Breadcrumb:', breadcrumb.message, breadcrumb.category);
       }
@@ -94,15 +92,20 @@ export const initSentry = () => {
     }
   });
 
-  console.log(`✅ Sentry initialized for frontend (DEBUG MODE) - Environment: ${environment}, Release: ${release}`);
+  console.log(`✅ Sentry initialized for frontend - Environment: ${environment}, Release: ${release}, Debug: ${environment === 'development'}`);
   
-  // Test Sentry immediately
-  Sentry.captureMessage('Sentry Frontend Initialized Successfully', 'info');
+  // Test Sentry immediately only in development
+  if (environment === 'development') {
+    Sentry.captureMessage('Sentry Frontend Initialized Successfully', 'info');
+  }
 };
 
 // Helper functions for manual error reporting
 export const captureError = (error: Error, context?: Record<string, any>) => {
-  console.log('📤 Frontend capturing error to Sentry:', error.message, context);
+  // Only log to console in development
+  if (import.meta.env.DEV) {
+    console.log('📤 Frontend capturing error to Sentry:', error.message, context);
+  }
   
   Sentry.withScope((scope) => {
     if (context) {
@@ -115,7 +118,10 @@ export const captureError = (error: Error, context?: Record<string, any>) => {
 };
 
 export const captureMessage = (message: string, level: 'info' | 'warning' | 'error' = 'info', context?: Record<string, any>) => {
-  console.log(`📤 Frontend capturing message to Sentry [${level}]:`, message, context);
+  // Only log to console in development
+  if (import.meta.env.DEV) {
+    console.log(`📤 Frontend capturing message to Sentry [${level}]:`, message, context);
+  }
   
   Sentry.withScope((scope) => {
     if (context) {
@@ -125,7 +131,11 @@ export const captureMessage = (message: string, level: 'info' | 'warning' | 'err
     }
     
     const eventId = Sentry.captureMessage(message, level);
-    console.log(`✅ Frontend Sentry message captured with ID: ${eventId}`);
+    
+    // Only log success in development
+    if (import.meta.env.DEV) {
+      console.log(`✅ Frontend Sentry message captured with ID: ${eventId}`);
+    }
     
     return eventId;
   });
@@ -142,7 +152,10 @@ export const setUserContext = (user: { id?: string; email?: string; sessionId?: 
 };
 
 export const addBreadcrumb = (message: string, category: string, data?: Record<string, any>) => {
-  console.log(`🍞 Frontend adding breadcrumb: ${message} [${category}]`, data);
+  // Only log to console in development
+  if (import.meta.env.DEV) {
+    console.log(`🍞 Frontend adding breadcrumb: ${message} [${category}]`, data);
+  }
   
   Sentry.addBreadcrumb({
     message,

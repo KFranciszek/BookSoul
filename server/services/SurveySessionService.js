@@ -6,9 +6,11 @@ export class SurveySessionService {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    // Debug logging
-    logger.debug(`🔍 Supabase URL check: ${supabaseUrl ? 'PRESENT' : 'MISSING'}`);
-    logger.debug(`🔍 Supabase Key check: ${supabaseKey ? 'PRESENT' : 'MISSING'}`);
+    // Debug logging only in development
+    if (process.env.NODE_ENV === 'development') {
+      logger.debug(`🔍 Supabase URL check: ${supabaseUrl ? 'PRESENT' : 'MISSING'}`);
+      logger.debug(`🔍 Supabase Key check: ${supabaseKey ? 'PRESENT' : 'MISSING'}`);
+    }
     
     if (!supabaseUrl || !supabaseKey || 
         supabaseUrl === 'https://placeholder.supabase.co' || 
@@ -180,27 +182,87 @@ export class SurveySessionService {
     }
   }
 
+  // OPTIMIZED: Use database aggregations instead of fetching all data
   async getAnalytics() {
     if (this.useInMemoryStorage) {
       return this.getInMemoryAnalytics();
     }
 
     try {
-      // Get basic statistics
-      const { data: sessions, error } = await this.supabase
-        .from('survey_sessions')
-        .select('survey_mode, user_ratings, created_at');
+      // Use database aggregations for better performance
+      const [
+        { data: sessionCounts },
+        { data: ratingStats },
+        { data: recentSessions }
+      ] = await Promise.all([
+        // Count sessions by mode
+        this.supabase
+          .from('survey_sessions')
+          .select('survey_mode')
+          .then(({ data }) => ({ data })),
+        
+        // Get rating statistics
+        this.supabase
+          .from('survey_sessions')
+          .select('user_ratings')
+          .neq('user_ratings', '{}')
+          .then(({ data }) => ({ data })),
+        
+        // Get recent sessions
+        this.supabase
+          .from('survey_sessions')
+          .select('id, survey_mode, created_at, user_ratings')
+          .order('created_at', { ascending: false })
+          .limit(10)
+          .then(({ data }) => ({ data }))
+      ]);
 
-      if (error) {
-        throw error;
-      }
-
-      return this.calculateAnalytics(sessions);
+      return this.calculateOptimizedAnalytics(sessionCounts, ratingStats, recentSessions);
 
     } catch (error) {
-      logger.error('❌ Failed to fetch analytics:', error);
+      logger.error('❌ Failed to fetch optimized analytics:', error);
       return this.getInMemoryAnalytics();
     }
+  }
+
+  calculateOptimizedAnalytics(sessionCounts, ratingStats, recentSessions) {
+    const analytics = {
+      totalSessions: sessionCounts?.length || 0,
+      sessionsByMode: {},
+      ratingsDistribution: { 0: 0, 1: 0, 2: 0 },
+      averageRating: 0,
+      sessionsWithRatings: 0,
+      recentSessions: recentSessions || []
+    };
+
+    // Count sessions by mode
+    if (sessionCounts) {
+      sessionCounts.forEach(session => {
+        analytics.sessionsByMode[session.survey_mode] = 
+          (analytics.sessionsByMode[session.survey_mode] || 0) + 1;
+      });
+    }
+
+    // Calculate rating statistics
+    let totalRatings = 0;
+    let ratingSum = 0;
+
+    if (ratingStats) {
+      ratingStats.forEach(session => {
+        const ratings = Object.values(session.user_ratings || {});
+        if (ratings.length > 0) {
+          analytics.sessionsWithRatings++;
+          ratings.forEach(rating => {
+            analytics.ratingsDistribution[rating]++;
+            totalRatings++;
+            ratingSum += rating;
+          });
+        }
+      });
+    }
+
+    analytics.averageRating = totalRatings > 0 ? ratingSum / totalRatings : 0;
+    return analytics;
   }
 
   getInMemoryAnalytics() {
@@ -271,6 +333,7 @@ export class SurveySessionService {
     }
   }
 
+  // OPTIMIZED: Use database aggregations for book ratings
   async getRatingsByBook() {
     if (this.useInMemoryStorage) {
       const sessions = Array.from(this.sessions.values());
@@ -280,7 +343,8 @@ export class SurveySessionService {
     try {
       const { data: sessions, error } = await this.supabase
         .from('survey_sessions')
-        .select('recommendations, user_ratings');
+        .select('recommendations, user_ratings')
+        .neq('user_ratings', '{}');
 
       if (error) {
         throw error;

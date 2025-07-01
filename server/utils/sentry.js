@@ -21,20 +21,17 @@ export const initSentry = () => {
       new Sentry.Integrations.Http({ tracing: true }),
       // Enable Express.js middleware tracing
       new Sentry.Integrations.Express({ app: undefined }),
-      // REMOVED: ProfilingIntegration - not compatible with WebContainer
     ],
     // Performance Monitoring
     tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
-    // REMOVED: profilesSampleRate - profiling disabled
     
-    // CRITICAL: Enable debug mode to see what's being sent
-    debug: true, // ZAWSZE TRUE dla debugowania
+    // PRODUCTION-SAFE: Disable debug mode in production
+    debug: environment === 'development',
     
     // Error filtering
     beforeSend(event, hint) {
-      // TEMPORARILY DISABLE FILTERING to see all events
+      // Only log debug info in development
       if (environment === 'development') {
-        // Log what we're sending to Sentry
         console.log('🔍 Sentry Event:', {
           type: event.type,
           level: event.level,
@@ -44,7 +41,7 @@ export const initSentry = () => {
         });
       }
       
-      // Filter out expected errors in production ONLY
+      // Filter out expected errors in production
       if (environment === 'production') {
         // Don't send OpenAI rate limit errors (they're expected)
         if (event.exception?.values?.[0]?.value?.includes('rate_limit_exceeded')) {
@@ -77,9 +74,8 @@ export const initSentry = () => {
     // Server-specific settings
     serverName: process.env.SERVER_NAME || 'booksoul-backend',
     
-    // CRITICAL: Ensure all message levels are captured
+    // PRODUCTION-SAFE: Only log breadcrumbs in development
     beforeBreadcrumb(breadcrumb) {
-      // Log breadcrumbs in development
       if (environment === 'development') {
         console.log('🍞 Sentry Breadcrumb:', breadcrumb.message, breadcrumb.category);
       }
@@ -87,15 +83,20 @@ export const initSentry = () => {
     }
   });
 
-  logger.info(`✅ Sentry initialized for backend (DEBUG MODE) - Environment: ${environment}, Release: ${release}`);
+  logger.info(`✅ Sentry initialized for backend - Environment: ${environment}, Release: ${release}, Debug: ${environment === 'development'}`);
   
-  // Test Sentry immediately
-  Sentry.captureMessage('Sentry Backend Initialized Successfully', 'info');
+  // Test Sentry immediately only in development
+  if (environment === 'development') {
+    Sentry.captureMessage('Sentry Backend Initialized Successfully', 'info');
+  }
 };
 
 // Helper functions for manual error reporting
 export const captureError = (error, context = {}) => {
-  console.log('📤 Capturing error to Sentry:', error.message, context);
+  // Only log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📤 Capturing error to Sentry:', error.message, context);
+  }
   
   Sentry.withScope((scope) => {
     // Add context as tags and extra data
@@ -119,7 +120,10 @@ export const captureError = (error, context = {}) => {
 };
 
 export const captureMessage = (message, level = 'info', context = {}) => {
-  console.log(`📤 Capturing message to Sentry [${level}]:`, message, context);
+  // Only log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`📤 Capturing message to Sentry [${level}]:`, message, context);
+  }
   
   Sentry.withScope((scope) => {
     Object.keys(context).forEach(key => {
@@ -133,16 +137,22 @@ export const captureMessage = (message, level = 'info', context = {}) => {
     scope.setTag('component', 'backend');
     scope.setTag('service', 'booksoul-api');
     
-    // CRITICAL: Ensure the message is captured
     const eventId = Sentry.captureMessage(message, level);
-    console.log(`✅ Sentry message captured with ID: ${eventId}`);
+    
+    // Only log success in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Sentry message captured with ID: ${eventId}`);
+    }
     
     return eventId;
   });
 };
 
 export const addBreadcrumb = (message, category, data = {}) => {
-  console.log(`🍞 Adding breadcrumb: ${message} [${category}]`, data);
+  // Only log to console in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🍞 Adding breadcrumb: ${message} [${category}]`, data);
+  }
   
   Sentry.addBreadcrumb({
     message,

@@ -1,5 +1,7 @@
 import { OpenAIService } from '../services/OpenAIService.js';
 import { logger } from '../utils/logger.js';
+import { detectPolishPreference } from '../utils/languageUtils.js';
+import { validateMatchScore } from '../utils/bookUtils.js';
 
 export class EvaluatorAgent {
   constructor() {
@@ -13,7 +15,7 @@ export class EvaluatorAgent {
     
     // Since books are now fully AI-generated with match scores, 
     // we mainly validate and potentially adjust them
-    let evaluatedBooks = []; // FIXED: Changed from const to let
+    let evaluatedBooks = [];
     
     for (const book of filteredBooks) {
       try {
@@ -50,7 +52,7 @@ export class EvaluatorAgent {
     // 2. Optionally refine it with another AI call (more accurate but slower)
     
     // For now, let's use the AI-generated evaluation as-is but validate it
-    const matchScore = this.validateMatchScore(book.matchScore);
+    const matchScore = validateMatchScore(book.matchScore);
     const matchingSteps = this.validateMatchingSteps(book.matchingSteps, book, surveyData);
     const psychologicalMatch = this.validatePsychologicalMatch(book.psychologicalMatch, userProfile);
     
@@ -59,13 +61,6 @@ export class EvaluatorAgent {
       matchingSteps,
       psychologicalMatch
     };
-  }
-
-  validateMatchScore(score) {
-    if (typeof score === 'number' && score >= 70 && score <= 98) {
-      return score;
-    }
-    return 85; // Default good score
   }
 
   validateMatchingSteps(steps, book, surveyData) {
@@ -92,7 +87,7 @@ export class EvaluatorAgent {
     
     // Genre matching
     if (surveyData.favoriteGenres?.length) {
-      const genreMatch = book.genre?.some(g => 
+      const genreMatch = book.genres?.some(g => 
         surveyData.favoriteGenres.some(fg => 
           g.toLowerCase().includes(fg.toLowerCase()) || 
           fg.toLowerCase().includes(g.toLowerCase())
@@ -137,7 +132,7 @@ export class EvaluatorAgent {
   }
 
   generateFallbackPsychMatch(book, userProfile, surveyData) {
-    const isPolish = this.detectPolishPreference(surveyData);
+    const isPolish = detectPolishPreference(surveyData);
     
     if (isPolish) {
       return {
@@ -154,18 +149,5 @@ export class EvaluatorAgent {
         personalityFit: `Appeals to ${userProfile.personalityTraits?.join(' and ') || 'your personality'} traits`
       };
     }
-  }
-
-  detectPolishPreference(surveyData) {
-    const textFields = [
-      surveyData.filmConnection,
-      surveyData.favoriteBooks,
-      surveyData.favoriteAuthors,
-      ...(surveyData.favoriteFilms || [])
-    ].filter(Boolean);
-    
-    const polishIndicators = /[ąćęłńóśźż]|się|jest|dla|czy|jak|gdzie|kiedy|dlaczego|bardzo|tylko|może|będzie|można|przez|oraz|także|między|podczas|według|właśnie|jednak|również|ponieważ|dlatego|żeby|aby|gdyby|jeśli|chociaż|mimo|oprócz|zamiast|wokół|około|podczas|przed|po|nad|pod|przy|bez|do|od|za|na|w|z|o|u|dla|przez|między|wśród|wobec|przeciwko|dzięki|zgodnie|według|wzdłuż|obok|koło|blisko|daleko|tutaj|tam|gdzie|kiedy|jak|dlaczego|czy|który|jaki|ile|kto|co|czyj|czym|kim|kogo|komu|czego|czemu|jakim|jaką|jakie|które|których|którym|którymi|tego|tej|tych|tym|tymi|ten|ta|to|te|ci|one|oni|ona|ono|jego|jej|ich|im|nimi|nią|nim|niego|niej/i;
-    
-    return textFields.some(text => polishIndicators.test(text));
   }
 }

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { SurveyData, BookRecommendation } from '../types';
 import { captureError, addBreadcrumb } from '../utils/sentry';
 
-// FIXED: Use proxy path instead of direct localhost URL
+// Use proxy path instead of direct localhost URL
 const API_BASE_URL = '/api';
 
 const api = axios.create({
@@ -16,8 +16,11 @@ const api = axios.create({
 // Request interceptor for logging and Sentry breadcrumbs
 api.interceptors.request.use(
   (config) => {
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
-    console.log(`🔗 Full URL: ${config.baseURL}${config.url}`);
+    // Only log in development
+    if (import.meta.env.DEV) {
+      console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
+      console.log(`🔗 Full URL: ${config.baseURL}${config.url}`);
+    }
     
     // Add Sentry breadcrumb for API requests
     addBreadcrumb(
@@ -33,16 +36,21 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('❌ API Request Error:', error);
+    if (import.meta.env.DEV) {
+      console.error('❌ API Request Error:', error);
+    }
     captureError(error, { context: 'api_request_interceptor' });
     return Promise.reject(error);
   }
 );
 
-// FIXED: Improved response interceptor with better error handling and Sentry integration
+// Improved response interceptor with better error handling and Sentry integration
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    // Only log in development
+    if (import.meta.env.DEV) {
+      console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    }
     
     // Add Sentry breadcrumb for successful API responses
     addBreadcrumb(
@@ -58,7 +66,10 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('❌ API Response Error:', error.response?.data || error.message);
+    // Only log in development
+    if (import.meta.env.DEV) {
+      console.error('❌ API Response Error:', error.response?.data || error.message);
+    }
     
     // Add Sentry breadcrumb for API errors
     addBreadcrumb(
@@ -186,8 +197,11 @@ export const recommendationAPI = {
     try {
       const endpoint = useOptimized ? '/recommendations-optimized/generate' : '/recommendations/generate';
       
-      console.log(`🎯 Generating ${surveyData.surveyMode} recommendations using ${useOptimized ? 'OPTIMIZED' : 'STANDARD'} pipeline...`);
-      console.log('📊 Survey data:', surveyData);
+      // Only log in development
+      if (import.meta.env.DEV) {
+        console.log(`🎯 Generating ${surveyData.surveyMode} recommendations using ${useOptimized ? 'OPTIMIZED' : 'STANDARD'} pipeline...`);
+        console.log('📊 Survey data:', surveyData);
+      }
       
       // Add Sentry breadcrumb for recommendation generation start
       addBreadcrumb(
@@ -211,10 +225,17 @@ export const recommendationAPI = {
       
       const { recommendations, sessionId, metadata } = response.data.data;
       
-      console.log(`✨ Generated ${recommendations.length} recommendations`);
-      console.log(`🤖 Agents used: ${metadata.agentsUsed.join(', ')}`);
-      console.log(`⏱️ Processing time: ${metadata.processingTime}ms`);
-      console.log(`📝 Session ID: ${sessionId}`);
+      // Only log in development
+      if (import.meta.env.DEV) {
+        console.log(`✨ Generated ${recommendations.length} recommendations`);
+        console.log(`🤖 Agents used: ${metadata.agentsUsed.join(', ')}`);
+        console.log(`⏱️ Processing time: ${metadata.processingTime}ms`);
+        console.log(`📝 Session ID: ${sessionId}`);
+        
+        if (metadata.optimized) {
+          console.log(`🚀 OPTIMIZED pipeline used - ${metadata.performance?.averageTimePerBook}ms per book`);
+        }
+      }
       
       // Add Sentry breadcrumb for successful recommendation generation
       addBreadcrumb(
@@ -228,17 +249,16 @@ export const recommendationAPI = {
         }
       );
       
-      if (metadata.optimized) {
-        console.log(`🚀 OPTIMIZED pipeline used - ${metadata.performance?.averageTimePerBook}ms per book`);
-      }
-      
       return {
         recommendations,
         sessionId
       };
       
     } catch (error) {
-      console.error('❌ Failed to generate recommendations:', error);
+      // Only log in development
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to generate recommendations:', error);
+      }
       
       // Capture error in Sentry with detailed context
       captureError(error instanceof Error ? error : new Error(String(error)), {
@@ -265,7 +285,9 @@ export const recommendationAPI = {
       return response.data.data;
       
     } catch (error) {
-      console.error('❌ Failed to get system status:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to get system status:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'system_status_check'
       });
@@ -279,7 +301,9 @@ export const recommendationAPI = {
       const response = await api.get('/recommendations-optimized/performance');
       return response.data.data;
     } catch (error) {
-      console.error('❌ Failed to fetch performance analytics:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to fetch performance analytics:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'performance_analytics'
       });
@@ -293,7 +317,9 @@ export const recommendationAPI = {
       const response = await api.post('/recommendations-optimized/clear-cache');
       return response.data.success;
     } catch (error) {
-      console.error('❌ Failed to clear performance cache:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to clear performance cache:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'cache_clear'
       });
@@ -313,7 +339,9 @@ export const recommendationAPI = {
       return response.data.data;
       
     } catch (error) {
-      console.error('❌ Failed to create survey session:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to create survey session:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'session_creation'
       });
@@ -343,7 +371,9 @@ export const recommendationAPI = {
       return response.data.success;
       
     } catch (error) {
-      console.error('❌ Failed to submit rating:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to submit rating:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'rating_submission',
         sessionId,
@@ -366,7 +396,9 @@ export const recommendationAPI = {
       return response.data.data;
       
     } catch (error) {
-      console.error('❌ Failed to fetch session:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to fetch session:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'session_fetch',
         sessionId
@@ -381,7 +413,9 @@ export const recommendationAPI = {
       const response = await api.get('/sessions/analytics');
       return response.data.data;
     } catch (error) {
-      console.error('❌ Failed to fetch analytics:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ Failed to fetch analytics:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'analytics_fetch'
       });
@@ -395,7 +429,9 @@ export const recommendationAPI = {
       const response = await api.get('/health');
       return response.data.status === 'healthy';
     } catch (error) {
-      console.error('❌ API health check failed:', error);
+      if (import.meta.env.DEV) {
+        console.error('❌ API health check failed:', error);
+      }
       captureError(error instanceof Error ? error : new Error(String(error)), {
         context: 'health_check'
       });

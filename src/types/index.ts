@@ -9,7 +9,7 @@ export interface SurveyData {
   actionPace?: string;
   triggers?: string[];
   
-  // Cinema mode specific fields - FIXED: Changed to string array
+  // Cinema mode specific fields
   favoriteFilms?: string[];
   filmConnection?: string;
   
@@ -61,7 +61,7 @@ export interface BookRecommendation {
   personalizedDescription: string;
   matchScore: number;
   matchingSteps: string[];
-  genres: string[];
+  genres: string[]; // FIXED: Standardized to 'genres' (plural)
   psychologicalMatch: {
     moodAlignment: string;
     cognitiveMatch: string;

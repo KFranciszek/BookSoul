@@ -20,7 +20,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   const [showPsychology, setShowPsychology] = useState(false);
   const { language } = useAppContext();
 
-  // FIXED: Add safety checks for undefined properties
+  // Add safety checks for undefined properties
   if (!book) {
     return (
       <div className="bg-white rounded-3xl shadow-lg p-6">
@@ -36,8 +36,8 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     return 'text-gray-600 bg-gray-100';
   };
 
-  // FIXED: Add fallback values for potentially undefined properties with proper translations
-  const safeGenres = book.genres || book.genre || [t('defaultGenre', language)];
+  // FIXED: Standardized to use 'genres' (plural) with proper fallbacks
+  const safeGenres = book.genres || [t('defaultGenre', language)];
   const safeMatchingSteps = book.matchingSteps || [t('defaultMatchingStep', language)];
   const safePsychologicalMatch = book.psychologicalMatch || {
     moodAlignment: t('defaultMoodAlignment', language),

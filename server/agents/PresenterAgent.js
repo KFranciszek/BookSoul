@@ -1,5 +1,7 @@
 import { OpenAIService } from '../services/OpenAIService.js';
 import { logger } from '../utils/logger.js';
+import { detectPolishPreference, translateDifficulty } from '../utils/languageUtils.js';
+import { generateBookDetails, generatePurchaseLinks } from '../utils/bookUtils.js';
 
 export class PresenterAgent {
   constructor() {
@@ -59,8 +61,8 @@ export class PresenterAgent {
         finalizedBooks.push({
           ...book,
           id: book.id || this.generateId(),
-          bookDetails: book.bookDetails || this.generateBookDetails(book, surveyData),
-          purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author),
+          bookDetails: book.bookDetails || generateBookDetails(book, surveyData),
+          purchaseLinks: book.purchaseLinks || generatePurchaseLinks(book.title, book.author),
           psychologicalMatch: book.psychologicalMatch || this.generateLocalizedPsychMatch(book, userProfile, surveyData)
         });
       }
@@ -76,29 +78,16 @@ export class PresenterAgent {
     return {
       ...book,
       id: book.id || this.generateId(),
-      bookDetails: book.bookDetails || this.generateBookDetails(book, surveyData),
-      purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author),
+      bookDetails: book.bookDetails || generateBookDetails(book, surveyData),
+      purchaseLinks: book.purchaseLinks || generatePurchaseLinks(book.title, book.author),
       psychologicalMatch: book.psychologicalMatch || this.generateLocalizedPsychMatch(book, userProfile, surveyData),
       // Ensure personalizedDescription exists (should be from AI)
       personalizedDescription: book.personalizedDescription || this.generateFallbackDescription(book, userProfile, surveyData)
     };
   }
 
-  detectPolishPreference(surveyData) {
-    const textFields = [
-      surveyData.filmConnection,
-      surveyData.favoriteBooks,
-      surveyData.favoriteAuthors,
-      ...(surveyData.favoriteFilms || [])
-    ].filter(Boolean);
-    
-    const polishIndicators = /[ąćęłńóśźż]|się|jest|dla|czy|jak|gdzie|kiedy|dlaczego|bardzo|tylko|może|będzie|można|przez|oraz|także|między|podczas|według|właśnie|jednak|również|ponieważ|dlatego|żeby|aby|gdyby|jeśli|chociaż|mimo|oprócz|zamiast|wokół|około|podczas|przed|po|nad|pod|przy|bez|do|od|za|na|w|z|o|u|dla|przez|między|wśród|wobec|przeciwko|dzięki|zgodnie|według|wzdłuż|obok|koło|blisko|daleko|tutaj|tam|gdzie|kiedy|jak|dlaczego|czy|który|jaki|ile|kto|co|czyj|czym|kim|kogo|komu|czego|czemu|jakim|jaką|jakie|które|których|którym|którymi|tego|tej|tych|tym|tymi|ten|ta|to|te|ci|one|oni|ona|ono|jego|jej|ich|im|nimi|nią|nim|niego|niej/i;
-    
-    return textFields.some(text => polishIndicators.test(text));
-  }
-
   generateLocalizedPsychMatch(book, userProfile, surveyData) {
-    const isPolish = this.detectPolishPreference(surveyData);
+    const isPolish = detectPolishPreference(surveyData);
     
     if (isPolish) {
       return {
@@ -119,91 +108,24 @@ export class PresenterAgent {
 
   generateFallbackDescription(book, userProfile, surveyData) {
     const mode = surveyData.surveyMode;
-    const isPolish = this.detectPolishPreference(surveyData);
+    const isPolish = detectPolishPreference(surveyData);
     
     if (isPolish) {
       if (mode === 'cinema') {
         return `Na podstawie Twojej miłości do ${surveyData.favoriteFilms?.slice(0, 2).join(' i ')}, ta książka oddaje to samo ${surveyData.filmConnection || 'fascynujące opowiadanie'}, które przyciąga Cię do wspaniałego kina. ${book.description}`;
       }
       
-      return `Idealna dla Twojego ${surveyData.currentMood || 'obecnego'} nastroju i ${surveyData.readingGoal || 'celów czytelniczych'}, ta ${book.genre?.join('/')} ${book.genre?.includes('fiction') ? 'powieść' : 'książka'} oferuje dokładnie to, czego szukasz. ${book.description}`;
+      return `Idealna dla Twojego ${surveyData.currentMood || 'obecnego'} nastroju i ${surveyData.readingGoal || 'celów czytelniczych'}, ta ${book.genres?.join('/')} ${book.genres?.includes('fiction') ? 'powieść' : 'książka'} oferuje dokładnie to, czego szukasz. ${book.description}`;
     }
     
     if (mode === 'cinema') {
       return `Based on your love for ${surveyData.favoriteFilms?.slice(0, 2).join(' and ')}, this book captures the same ${surveyData.filmConnection || 'compelling storytelling'} that draws you to great cinema. ${book.description}`;
     }
     
-    return `Perfect for your ${surveyData.currentMood || 'current'} mood and ${surveyData.readingGoal || 'reading goals'}, this ${book.genre?.join('/')} ${book.genre?.includes('fiction') ? 'novel' : 'book'} offers exactly what you're seeking. ${book.description}`;
+    return `Perfect for your ${surveyData.currentMood || 'current'} mood and ${surveyData.readingGoal || 'reading goals'}, this ${book.genres?.join('/')} ${book.genres?.includes('fiction') ? 'novel' : 'book'} offers exactly what you're seeking. ${book.description}`;
   }
 
   generateId() {
     return `ai_rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  }
-
-  generateBookDetails(book, surveyData) {
-    const isPolish = this.detectPolishPreference(surveyData);
-    const pageCount = book.pageCount || 300;
-    
-    let length, readingTime;
-    
-    if (isPolish) {
-      if (pageCount < 200) {
-        length = 'Krótka';
-        readingTime = '2-4 godziny';
-      } else if (pageCount > 400) {
-        length = 'Długa';
-        readingTime = '8-12 godzin';
-      } else {
-        length = 'Średnia';
-        readingTime = '4-6 godzin';
-      }
-      
-      return {
-        length: `${length} (${pageCount} stron)`,
-        difficulty: this.translateDifficulty(book.complexity || 'medium', isPolish),
-        format: ['Fizyczna', 'E-book', 'Audiobook'],
-        readingTime
-      };
-    } else {
-      if (pageCount < 200) {
-        length = 'Short';
-        readingTime = '2-4 hours';
-      } else if (pageCount > 400) {
-        length = 'Long';
-        readingTime = '8-12 hours';
-      } else {
-        length = 'Medium';
-        readingTime = '4-6 hours';
-      }
-      
-      return {
-        length: `${length} (${pageCount} pages)`,
-        difficulty: book.complexity || 'Moderate',
-        format: ['Physical', 'E-book', 'Audiobook'],
-        readingTime
-      };
-    }
-  }
-
-  translateDifficulty(complexity, isPolish) {
-    if (!isPolish) return complexity;
-    
-    const difficultyMap = {
-      'low': 'Łatwa',
-      'medium': 'Umiarkowana',
-      'high': 'Trudna'
-    };
-    
-    return difficultyMap[complexity] || 'Umiarkowana';
-  }
-
-  generatePurchaseLinks(title, author) {
-    const encodedTitle = encodeURIComponent(`${title} ${author}`);
-    
-    return {
-      amazon: `https://amazon.com/s?k=${encodedTitle}`,
-      empik: `https://empik.com/szukaj/produkt?q=${encodedTitle}`,
-      taniaKsiazka: `https://taniaksiazka.pl/szukaj?q=${encodedTitle}`
-    };
   }
 }

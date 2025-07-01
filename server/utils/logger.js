@@ -7,6 +7,10 @@ const LOG_LEVELS = {
 
 const CURRENT_LEVEL = LOG_LEVELS[process.env.LOG_LEVEL?.toUpperCase()] ?? LOG_LEVELS.INFO;
 
+// Conditional logging based on environment
+const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NODE_ENV === 'production';
+
 class Logger {
   constructor() {
     this.colors = {
@@ -51,8 +55,22 @@ class Logger {
   }
 
   debug(message, data = null) {
-    if (CURRENT_LEVEL >= LOG_LEVELS.DEBUG) {
+    // Only log debug messages in development
+    if (CURRENT_LEVEL >= LOG_LEVELS.DEBUG && isDevelopment) {
       console.log(this.formatMessage('debug', message, data));
+    }
+  }
+
+  // Production-safe logging methods
+  devLog(message, data = null) {
+    if (isDevelopment) {
+      console.log(`[DEV] ${message}`, data || '');
+    }
+  }
+
+  prodLog(message, data = null) {
+    if (isProduction) {
+      console.log(`[PROD] ${message}`, data || '');
     }
   }
 }
