@@ -63,3 +63,6 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+      - type: proxy
+        source: /api/*
+        destination: https://booksoul-backend.onrender.com/api/$1
