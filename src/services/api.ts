@@ -1,64 +1,120 @@
 import axios from 'axios';
 import { SurveyData, BookRecommendation } from '../types';
+import { captureError, addBreadcrumb } from '../utils/sentry';
 
 // FIXED: Use proxy path instead of direct localhost URL
 const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 360000, // 6 minutes timeout for AI processing
+  timeout: 300000, // 5 minutes timeout for AI processing
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor for logging
+// Request interceptor for logging and Sentry breadcrumbs
 api.interceptors.request.use(
   (config) => {
     console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
     console.log(`🔗 Full URL: ${config.baseURL}${config.url}`);
+    
+    // Add Sentry breadcrumb for API requests
+    addBreadcrumb(
+      `API Request: ${config.method?.toUpperCase()} ${config.url}`,
+      'http',
+      {
+        url: `${config.baseURL}${config.url}`,
+        method: config.method?.toUpperCase(),
+        data: config.data ? 'present' : 'none'
+      }
+    );
+    
     return config;
   },
   (error) => {
     console.error('❌ API Request Error:', error);
+    captureError(error, { context: 'api_request_interceptor' });
     return Promise.reject(error);
   }
 );
 
-// FIXED: Improved response interceptor with better error handling
+// FIXED: Improved response interceptor with better error handling and Sentry integration
 api.interceptors.response.use(
   (response) => {
     console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+    
+    // Add Sentry breadcrumb for successful API responses
+    addBreadcrumb(
+      `API Response: ${response.status} ${response.config.url}`,
+      'http',
+      {
+        status: response.status,
+        url: response.config.url,
+        responseSize: JSON.stringify(response.data).length
+      }
+    );
+    
     return response;
   },
   (error) => {
     console.error('❌ API Response Error:', error.response?.data || error.message);
     
+    // Add Sentry breadcrumb for API errors
+    addBreadcrumb(
+      `API Error: ${error.response?.status || 'Network'} ${error.config?.url || 'Unknown'}`,
+      'http',
+      {
+        status: error.response?.status,
+        url: error.config?.url,
+        errorMessage: error.message,
+        errorData: error.response?.data
+      }
+    );
+    
+    // Capture error in Sentry with context
+    captureError(error, {
+      context: 'api_response_error',
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      responseData: error.response?.data
+    });
+    
     // Handle network errors specifically
     if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
-      throw new Error(`Cannot connect to backend server. Please ensure the backend server is running on port 3001 and try refreshing the page.`);
+      throw new Error(`Nie można połączyć się z serwerem backend. Upewnij się, że serwer backend działa na porcie 3001 i odśwież stronę.`);
+    }
+    
+    // Handle timeout errors
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      throw new Error('Przekroczono limit czasu żądania. AI potrzebuje więcej czasu na przetworzenie Twojego żądania. Spróbuj ponownie.');
     }
     
     // Handle specific error cases
     if (error.response?.status === 429) {
-      throw new Error('Too many requests. Please wait a moment and try again.');
+      throw new Error('Zbyt wiele żądań. Poczekaj chwilę i spróbuj ponownie.');
     }
     
     if (error.response?.status === 503) {
       const errorData = error.response.data;
       if (errorData?.error === 'AI recommendation models are currently unavailable') {
-        throw new Error(errorData.message || 'AI recommendation service is temporarily unavailable. Please check the system configuration.');
+        throw new Error(errorData.message || 'Usługa rekomendacji AI jest tymczasowo niedostępna. Sprawdź konfigurację systemu.');
       }
-      throw new Error('Service is temporarily unavailable. Please try again later.');
+      throw new Error('Usługa jest tymczasowo niedostępna. Spróbuj ponownie później.');
     }
     
-    if (error.code === 'ECONNABORTED') {
-      throw new Error('Request timed out. The AI is taking longer than usual to process your request.');
+    if (error.response?.status === 500) {
+      const errorData = error.response.data;
+      if (errorData?.message?.includes('AI')) {
+        throw new Error('Problem z usługą AI. Sprawdź konfigurację OpenAI API lub spróbuj ponownie.');
+      }
+      throw new Error('Błąd serwera. Spróbuj ponownie za chwilę.');
     }
     
     // Handle connection refused
     if (error.code === 'ECONNREFUSED') {
-      throw new Error('Connection refused. Backend server is not running or not accessible.');
+      throw new Error('Połączenie odrzucone. Serwer backend nie działa lub nie jest dostępny.');
     }
     
     throw error;
@@ -79,6 +135,12 @@ export interface RecommendationResponse {
         ai: boolean;
         database: boolean;
         overall: boolean;
+      };
+      optimized?: boolean;
+      performance?: {
+        totalTime: number;
+        averageTimePerBook: number;
+        cacheHits: number;
       };
     };
   };
@@ -119,13 +181,27 @@ export interface SystemStatus {
 }
 
 export const recommendationAPI = {
-  // Generate recommendations using AI agents
-  async generateRecommendations(surveyData: Partial<SurveyData>): Promise<{ recommendations: BookRecommendation[]; sessionId: string }> {
+  // Generate recommendations using AI agents (OPTIMIZED VERSION)
+  async generateRecommendations(surveyData: Partial<SurveyData>, useOptimized: boolean = true): Promise<{ recommendations: BookRecommendation[]; sessionId: string }> {
     try {
-      console.log(`🎯 Generating ${surveyData.surveyMode} recommendations...`);
+      const endpoint = useOptimized ? '/recommendations-optimized/generate' : '/recommendations/generate';
+      
+      console.log(`🎯 Generating ${surveyData.surveyMode} recommendations using ${useOptimized ? 'OPTIMIZED' : 'STANDARD'} pipeline...`);
       console.log('📊 Survey data:', surveyData);
       
-      const response = await api.post<RecommendationResponse>('/recommendations/generate', {
+      // Add Sentry breadcrumb for recommendation generation start
+      addBreadcrumb(
+        `Starting recommendation generation`,
+        'user_action',
+        {
+          mode: surveyData.surveyMode,
+          pipeline: useOptimized ? 'optimized' : 'standard',
+          hasGenres: !!surveyData.favoriteGenres?.length,
+          hasFilms: !!surveyData.favoriteFilms?.length
+        }
+      );
+      
+      const response = await api.post<RecommendationResponse>(endpoint, {
         surveyData
       });
       
@@ -133,18 +209,46 @@ export const recommendationAPI = {
         throw new Error(response.data.error || 'Failed to generate recommendations');
       }
       
-      console.log(`✨ Generated ${response.data.data.recommendations.length} recommendations`);
-      console.log(`🤖 Agents used: ${response.data.data.metadata.agentsUsed.join(', ')}`);
-      console.log(`⏱️ Processing time: ${response.data.data.metadata.processingTime}ms`);
-      console.log(`📝 Session ID: ${response.data.data.sessionId}`);
+      const { recommendations, sessionId, metadata } = response.data.data;
+      
+      console.log(`✨ Generated ${recommendations.length} recommendations`);
+      console.log(`🤖 Agents used: ${metadata.agentsUsed.join(', ')}`);
+      console.log(`⏱️ Processing time: ${metadata.processingTime}ms`);
+      console.log(`📝 Session ID: ${sessionId}`);
+      
+      // Add Sentry breadcrumb for successful recommendation generation
+      addBreadcrumb(
+        `Recommendations generated successfully`,
+        'user_action',
+        {
+          count: recommendations.length,
+          processingTime: metadata.processingTime,
+          sessionId,
+          agentsUsed: metadata.agentsUsed.join(', ')
+        }
+      );
+      
+      if (metadata.optimized) {
+        console.log(`🚀 OPTIMIZED pipeline used - ${metadata.performance?.averageTimePerBook}ms per book`);
+      }
       
       return {
-        recommendations: response.data.data.recommendations,
-        sessionId: response.data.data.sessionId
+        recommendations,
+        sessionId
       };
       
     } catch (error) {
       console.error('❌ Failed to generate recommendations:', error);
+      
+      // Capture error in Sentry with detailed context
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'recommendation_generation',
+        surveyMode: surveyData.surveyMode,
+        useOptimized,
+        hasGenres: !!surveyData.favoriteGenres?.length,
+        hasFilms: !!surveyData.favoriteFilms?.length
+      });
+      
       throw error; // Re-throw the error to be handled by the UI
     }
   },
@@ -162,7 +266,38 @@ export const recommendationAPI = {
       
     } catch (error) {
       console.error('❌ Failed to get system status:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'system_status_check'
+      });
       throw error;
+    }
+  },
+
+  // Get performance analytics (OPTIMIZED)
+  async getPerformanceAnalytics(): Promise<any> {
+    try {
+      const response = await api.get('/recommendations-optimized/performance');
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Failed to fetch performance analytics:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'performance_analytics'
+      });
+      return null;
+    }
+  },
+
+  // Clear performance caches (OPTIMIZED)
+  async clearPerformanceCache(): Promise<boolean> {
+    try {
+      const response = await api.post('/recommendations-optimized/clear-cache');
+      return response.data.success;
+    } catch (error) {
+      console.error('❌ Failed to clear performance cache:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'cache_clear'
+      });
+      return false;
     }
   },
 
@@ -179,6 +314,9 @@ export const recommendationAPI = {
       
     } catch (error) {
       console.error('❌ Failed to create survey session:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'session_creation'
+      });
       throw error;
     }
   },
@@ -186,6 +324,16 @@ export const recommendationAPI = {
   // Submit a rating for a book recommendation
   async submitRating(sessionId: string, bookId: string, rating: number): Promise<boolean> {
     try {
+      addBreadcrumb(
+        `Submitting rating`,
+        'user_action',
+        {
+          sessionId,
+          bookId,
+          rating
+        }
+      );
+      
       const response = await api.post('/sessions/rating', {
         sessionId,
         bookId,
@@ -196,6 +344,12 @@ export const recommendationAPI = {
       
     } catch (error) {
       console.error('❌ Failed to submit rating:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'rating_submission',
+        sessionId,
+        bookId,
+        rating
+      });
       throw error;
     }
   },
@@ -213,6 +367,10 @@ export const recommendationAPI = {
       
     } catch (error) {
       console.error('❌ Failed to fetch session:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'session_fetch',
+        sessionId
+      });
       return null;
     }
   },
@@ -224,6 +382,9 @@ export const recommendationAPI = {
       return response.data.data;
     } catch (error) {
       console.error('❌ Failed to fetch analytics:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'analytics_fetch'
+      });
       return null;
     }
   },
@@ -235,6 +396,9 @@ export const recommendationAPI = {
       return response.data.status === 'healthy';
     } catch (error) {
       console.error('❌ API health check failed:', error);
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'health_check'
+      });
       return false;
     }
   }

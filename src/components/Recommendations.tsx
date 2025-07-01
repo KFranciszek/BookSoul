@@ -124,7 +124,7 @@ const Recommendations: React.FC = () => {
           <div className="flex items-center justify-center gap-6 text-gray-500 mb-8">
             <div className="flex items-center">
               <Heart className="w-5 h-5 mr-2 text-pink-500" />
-              <span>Personalized just for you</span>
+              <span>{t('personalizedJustForYou', language)}</span>
             </div>
             <div className="flex items-center">
               {isCinemaMode ? (
@@ -135,7 +135,7 @@ const Recommendations: React.FC = () => {
                 <Brain className="w-5 h-5 mr-2 text-teal-500" />
               )}
               <span>
-                {isCinemaMode ? 'CineMatch™' : isQuickMode ? 'Quick Match' : 'Deep Analysis'}
+                {isCinemaMode ? t('cinematch', language) : isQuickMode ? t('quickMatch', language) : t('deepAnalysis', language)}
               </span>
             </div>
           </div>
@@ -144,22 +144,19 @@ const Recommendations: React.FC = () => {
           {isCinemaMode ? (
             <div className="bg-purple-50 border border-purple-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
               <p className="text-purple-800">
-                <strong>CineMatch™ Results:</strong> These books capture the same storytelling magic as your favorite films and series. 
-                Each recommendation is chosen to give you that same emotional experience you love on screen!
+                <strong>{t('cinematch', language)} {t('results', language)}:</strong> {t('cinematchResults', language)}
               </p>
             </div>
           ) : isQuickMode ? (
             <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
               <p className="text-orange-800">
-                <strong>Quick Match Results:</strong> These recommendations focus on your core preferences and mood. 
-                For even more personalized suggestions, try our Deep Analysis mode next time!
+                <strong>{t('quickMatch', language)} {t('results', language)}:</strong> {t('quickMatchResults', language)}
               </p>
             </div>
           ) : (
             <div className="bg-teal-50 border border-teal-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
               <p className="text-teal-800">
-                <strong>Deep Analysis Complete:</strong> These recommendations are based on your comprehensive psychological profile, 
-                including stress levels, emotional needs, and reading psychology.
+                <strong>{t('deepAnalysis', language)} {t('complete', language)}:</strong> {t('deepAnalysisResults', language)}
               </p>
             </div>
           )}
@@ -167,8 +164,7 @@ const Recommendations: React.FC = () => {
           {/* Rating Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
             <p className="text-blue-800">
-              <strong>Help us improve:</strong> Rate each recommendation to help our AI learn your preferences better. 
-              Your feedback makes future recommendations even more accurate!
+              <strong>{t('helpUs', language)} {t('improve', language)}:</strong> {t('helpUsImprove', language)}
             </p>
           </div>
         </div>
@@ -202,7 +198,7 @@ const Recommendations: React.FC = () => {
             className="flex items-center justify-center px-6 py-3 bg-gray-200 text-gray-700 rounded-2xl font-medium hover:bg-gray-300 transition-all"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
-            Refine Preferences
+            {t('refinePreferences', language)}
           </button>
           
           <button
@@ -210,25 +206,25 @@ const Recommendations: React.FC = () => {
             className="flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-2xl font-medium hover:from-orange-600 hover:to-pink-600 transition-all transform hover:-translate-y-1"
           >
             <RefreshCw className="w-5 h-5 mr-2" />
-            Start New Search
+            {t('startNewSearch', language)}
           </button>
         </div>
 
         {/* Footer Message */}
         <div className="text-center mt-12 p-6 bg-white/60 backdrop-blur-sm rounded-3xl">
           <p className="text-gray-600 mb-2">
-            <strong>Happy Reading!</strong> 📚
+            <strong>{t('happyReading', language)}!</strong> 📚
           </p>
           <p className="text-sm text-gray-500">
-            Remember, the best book is the one that speaks to you in this moment of your journey.
+            {t('bestBookQuote', language)}
           </p>
           {isCinemaMode ? (
             <p className="text-sm text-purple-600 mt-2">
-              🎬 Loved these film-inspired picks? Try our Deep Analysis for even more personalized recommendations!
+              {t('lovedCinemaPicks', language)}
             </p>
           ) : isQuickMode ? (
             <p className="text-sm text-orange-600 mt-2">
-              💡 Want even better matches? Try our Deep Analysis mode for your next book search!
+              {t('wantBetterMatches', language)}
             </p>
           ) : null}
         </div>

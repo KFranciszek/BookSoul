@@ -5,21 +5,22 @@ export class PresenterAgent {
   constructor() {
     this.openai = new OpenAIService();
     this.name = 'Presenter';
-    this.role = 'Tworzy przyjazny, empatyczny komunikat z rekomendacjami';
+    this.role = 'Finalizuje prezentację rekomendacji wygenerowanych przez AI';
   }
 
   async presentRecommendations(evaluatedBooks, userProfile, surveyData) {
-    logger.info(`🧭 ${this.name}: Preparing final presentation...`);
+    logger.info(`🧭 ${this.name}: Finalizing AI-generated recommendations...`);
     
     // Select top recommendations based on mode
     const topBooks = this.selectTopRecommendations(evaluatedBooks, surveyData);
     
-    // Enhance each recommendation with personalized descriptions
-    const enhancedBooks = await this.enhanceRecommendations(topBooks, userProfile, surveyData);
+    // Since books are already AI-generated with personalized descriptions,
+    // we mainly need to ensure they have all required fields
+    const finalBooks = await this.finalizeRecommendations(topBooks, userProfile, surveyData);
     
-    logger.info(`🧭 ${this.name}: Prepared ${enhancedBooks.length} final recommendations`);
+    logger.info(`🧭 ${this.name}: Finalized ${finalBooks.length} AI-generated recommendations`);
     
-    return enhancedBooks;
+    return finalBooks;
   }
 
   selectTopRecommendations(evaluatedBooks, surveyData) {
@@ -43,88 +44,90 @@ export class PresenterAgent {
     return evaluatedBooks.slice(0, count);
   }
 
-  async enhanceRecommendations(books, userProfile, surveyData) {
-    const enhancedBooks = [];
+  async finalizeRecommendations(books, userProfile, surveyData) {
+    const finalizedBooks = [];
     
     for (const book of books) {
       try {
-        const enhancement = await this.enhanceBook(book, userProfile, surveyData);
-        enhancedBooks.push({
-          ...book,
-          ...enhancement,
-          id: book.id || this.generateId(),
-          bookDetails: this.generateBookDetails(book),
-          purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author)
-        });
+        // Books are already AI-generated with most fields
+        // We just need to ensure they have all required fields
+        const finalizedBook = await this.ensureCompleteBook(book, userProfile, surveyData);
+        finalizedBooks.push(finalizedBook);
       } catch (error) {
-        logger.warn(`🧭 Failed to enhance "${book.title}":`, error.message);
-        // Use fallback enhancement
-        enhancedBooks.push({
+        logger.warn(`🧭 Failed to finalize "${book.title}":`, error.message);
+        // Use the book as-is with fallback fields
+        finalizedBooks.push({
           ...book,
-          personalizedDescription: this.generateFallbackDescription(book, userProfile, surveyData),
           id: book.id || this.generateId(),
-          bookDetails: this.generateBookDetails(book),
-          purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author)
+          bookDetails: book.bookDetails || this.generateBookDetails(book, surveyData),
+          purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author),
+          psychologicalMatch: book.psychologicalMatch || this.generateLocalizedPsychMatch(book, userProfile, surveyData)
         });
       }
     }
     
-    return enhancedBooks;
+    return finalizedBooks;
   }
 
-  async enhanceBook(book, userProfile, surveyData) {
-    const prompt = this.buildEnhancementPrompt(book, userProfile, surveyData);
-    
-    const response = await this.openai.generateCompletion(prompt, {
-      temperature: 0.6,
-      maxTokens: 300
-    });
+  async ensureCompleteBook(book, userProfile, surveyData) {
+    // The book should already have personalizedDescription from AI generation
+    // We just need to ensure all required fields are present
     
     return {
-      personalizedDescription: response.trim()
+      ...book,
+      id: book.id || this.generateId(),
+      bookDetails: book.bookDetails || this.generateBookDetails(book, surveyData),
+      purchaseLinks: book.purchaseLinks || this.generatePurchaseLinks(book.title, book.author),
+      psychologicalMatch: book.psychologicalMatch || this.generateLocalizedPsychMatch(book, userProfile, surveyData),
+      // Ensure personalizedDescription exists (should be from AI)
+      personalizedDescription: book.personalizedDescription || this.generateFallbackDescription(book, userProfile, surveyData)
     };
   }
 
-  buildEnhancementPrompt(book, userProfile, surveyData) {
-    const mode = surveyData.surveyMode;
+  detectPolishPreference(surveyData) {
+    const textFields = [
+      surveyData.filmConnection,
+      surveyData.favoriteBooks,
+      surveyData.favoriteAuthors,
+      ...(surveyData.favoriteFilms || [])
+    ].filter(Boolean);
     
-    let prompt = `Write a personalized book description that speaks directly to this reader:
+    const polishIndicators = /[ąćęłńóśźż]|się|jest|dla|czy|jak|gdzie|kiedy|dlaczego|bardzo|tylko|może|będzie|można|przez|oraz|także|między|podczas|według|właśnie|jednak|również|ponieważ|dlatego|żeby|aby|gdyby|jeśli|chociaż|mimo|oprócz|zamiast|wokół|około|podczas|przed|po|nad|pod|przy|bez|do|od|za|na|w|z|o|u|dla|przez|między|wśród|wobec|przeciwko|dzięki|zgodnie|według|wzdłuż|obok|koło|blisko|daleko|tutaj|tam|gdzie|kiedy|jak|dlaczego|czy|który|jaki|ile|kto|co|czyj|czym|kim|kogo|komu|czego|czemu|jakim|jaką|jakie|które|których|którym|którymi|tego|tej|tych|tym|tymi|ten|ta|to|te|ci|one|oni|ona|ono|jego|jej|ich|im|nimi|nią|nim|niego|niej/i;
+    
+    return textFields.some(text => polishIndicators.test(text));
+  }
 
-BOOK: "${book.title}" by ${book.author}
-Original Description: ${book.description}
-Match Score: ${book.matchScore}%
-
-READER PROFILE:
-- Emotional State: ${userProfile.emotionalState}
-- Reading Motivation: ${userProfile.readingMotivation}
-- Personality: ${userProfile.personalityTraits?.join(', ')}
-- Survey Mode: ${mode}
-`;
-
-    if (mode === 'cinema') {
-      prompt += `
-- Favorite Films: ${surveyData.favoriteFilms?.join(', ')}
-- Film Connection: ${surveyData.filmConnection || 'Not specified'}
-
-Write 2-3 sentences explaining why this book will appeal to someone who loves these films. Focus on cinematic qualities, narrative style, and emotional resonance. Be warm and enthusiastic.`;
+  generateLocalizedPsychMatch(book, userProfile, surveyData) {
+    const isPolish = this.detectPolishPreference(surveyData);
+    
+    if (isPolish) {
+      return {
+        moodAlignment: `Dopasowuje się do Twojego ${userProfile.emotionalState || 'obecnego stanu emocjonalnego'}`,
+        cognitiveMatch: `Pasuje do Twoich ${userProfile.cognitiveStyle || 'poznawczych'} preferencji`,
+        therapeuticValue: `Wspiera Twoje ${userProfile.readingMotivation || 'cele czytelnicze'}`,
+        personalityFit: `Przemawia do cech ${userProfile.personalityTraits?.join(' i ') || 'Twojej osobowości'}`
+      };
     } else {
-      prompt += `
-- Current Mood: ${surveyData.currentMood}
-- Reading Goal: ${surveyData.readingGoal}
-- Favorite Genres: ${surveyData.favoriteGenres?.join(', ')}
-
-Write 2-3 sentences explaining why this book is perfect for them right now. Reference their mood, goals, and preferences. Be empathetic and encouraging.`;
+      return {
+        moodAlignment: `Complements your ${userProfile.emotionalState || 'current emotional state'}`,
+        cognitiveMatch: `Matches your ${userProfile.cognitiveStyle || 'cognitive'} preferences`,
+        therapeuticValue: `Supports your ${userProfile.readingMotivation || 'reading goals'}`,
+        personalityFit: `Appeals to ${userProfile.personalityTraits?.join(' and ') || 'your personality'} traits`
+      };
     }
-
-    prompt += `
-
-Make it personal, warm, and compelling. Start with "Based on your..." or "Perfect for your..." or similar personal connection.`;
-
-    return prompt;
   }
 
   generateFallbackDescription(book, userProfile, surveyData) {
     const mode = surveyData.surveyMode;
+    const isPolish = this.detectPolishPreference(surveyData);
+    
+    if (isPolish) {
+      if (mode === 'cinema') {
+        return `Na podstawie Twojej miłości do ${surveyData.favoriteFilms?.slice(0, 2).join(' i ')}, ta książka oddaje to samo ${surveyData.filmConnection || 'fascynujące opowiadanie'}, które przyciąga Cię do wspaniałego kina. ${book.description}`;
+      }
+      
+      return `Idealna dla Twojego ${surveyData.currentMood || 'obecnego'} nastroju i ${surveyData.readingGoal || 'celów czytelniczych'}, ta ${book.genre?.join('/')} ${book.genre?.includes('fiction') ? 'powieść' : 'książka'} oferuje dokładnie to, czego szukasz. ${book.description}`;
+    }
     
     if (mode === 'cinema') {
       return `Based on your love for ${surveyData.favoriteFilms?.slice(0, 2).join(' and ')}, this book captures the same ${surveyData.filmConnection || 'compelling storytelling'} that draws you to great cinema. ${book.description}`;
@@ -134,26 +137,64 @@ Make it personal, warm, and compelling. Start with "Based on your..." or "Perfec
   }
 
   generateId() {
-    return `rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `ai_rec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  generateBookDetails(book) {
+  generateBookDetails(book, surveyData) {
+    const isPolish = this.detectPolishPreference(surveyData);
     const pageCount = book.pageCount || 300;
-    let length = 'Medium';
     
-    if (pageCount < 200) length = 'Short';
-    else if (pageCount > 400) length = 'Long';
+    let length, readingTime;
     
-    let readingTime = '4-6 hours';
-    if (pageCount < 200) readingTime = '2-4 hours';
-    else if (pageCount > 400) readingTime = '8-12 hours';
+    if (isPolish) {
+      if (pageCount < 200) {
+        length = 'Krótka';
+        readingTime = '2-4 godziny';
+      } else if (pageCount > 400) {
+        length = 'Długa';
+        readingTime = '8-12 godzin';
+      } else {
+        length = 'Średnia';
+        readingTime = '4-6 godzin';
+      }
+      
+      return {
+        length: `${length} (${pageCount} stron)`,
+        difficulty: this.translateDifficulty(book.complexity || 'medium', isPolish),
+        format: ['Fizyczna', 'E-book', 'Audiobook'],
+        readingTime
+      };
+    } else {
+      if (pageCount < 200) {
+        length = 'Short';
+        readingTime = '2-4 hours';
+      } else if (pageCount > 400) {
+        length = 'Long';
+        readingTime = '8-12 hours';
+      } else {
+        length = 'Medium';
+        readingTime = '4-6 hours';
+      }
+      
+      return {
+        length: `${length} (${pageCount} pages)`,
+        difficulty: book.complexity || 'Moderate',
+        format: ['Physical', 'E-book', 'Audiobook'],
+        readingTime
+      };
+    }
+  }
+
+  translateDifficulty(complexity, isPolish) {
+    if (!isPolish) return complexity;
     
-    return {
-      length: `${length} (${pageCount} pages)`,
-      difficulty: book.complexity || 'Moderate',
-      format: ['Physical', 'E-book', 'Audiobook'],
-      readingTime
+    const difficultyMap = {
+      'low': 'Łatwa',
+      'medium': 'Umiarkowana',
+      'high': 'Trudna'
     };
+    
+    return difficultyMap[complexity] || 'Umiarkowana';
   }
 
   generatePurchaseLinks(title, author) {

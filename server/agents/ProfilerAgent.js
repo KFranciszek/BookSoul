@@ -1,5 +1,6 @@
 import { OpenAIService } from '../services/OpenAIService.js';
 import { logger } from '../utils/logger.js';
+import { captureAgentError, addBreadcrumb } from '../utils/sentry.js';
 
 export class ProfilerAgent {
   constructor() {
@@ -11,6 +12,17 @@ export class ProfilerAgent {
   async analyzeProfile(surveyData) {
     logger.info(`🧠 ${this.name}: Analyzing user profile...`);
     
+    addBreadcrumb(
+      `${this.name} agent started`,
+      'ai_agent',
+      {
+        agent: this.name,
+        surveyMode: surveyData.surveyMode,
+        hasGenres: !!surveyData.favoriteGenres?.length,
+        hasFilms: !!surveyData.favoriteFilms?.length
+      }
+    );
+    
     try {
       const prompt = this.buildProfilePrompt(surveyData);
       const analysis = await this.openai.generateCompletion(prompt, {
@@ -21,10 +33,26 @@ export class ProfilerAgent {
       const profile = this.parseProfileAnalysis(analysis, surveyData);
       
       logger.info(`🧠 ${this.name}: Profile analysis complete`);
+      
+      addBreadcrumb(
+        `${this.name} agent completed`,
+        'ai_agent',
+        {
+          agent: this.name,
+          confidence: profile.confidence,
+          emotionalState: profile.emotionalState,
+          complexityLevel: profile.complexityLevel
+        }
+      );
+      
       return profile;
       
     } catch (error) {
       logger.error(`❌ ${this.name} failed:`, error);
+      captureAgentError(this.name, error, {
+        surveyMode: surveyData.surveyMode,
+        context: 'profile_analysis'
+      });
       return this.getFallbackProfile(surveyData);
     }
   }
@@ -106,6 +134,10 @@ Return as JSON with these fields:
       
     } catch (error) {
       logger.warn(`🧠 ${this.name}: Failed to parse AI response, using fallback`);
+      captureAgentError(this.name, error, {
+        context: 'profile_parsing',
+        rawResponse: analysis?.substring(0, 200)
+      });
       return this.getFallbackProfile(surveyData);
     }
   }

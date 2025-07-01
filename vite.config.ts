@@ -7,6 +7,12 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  define: {
+    // Make environment variables available to the frontend
+    'import.meta.env.VITE_SENTRY_DSN': JSON.stringify(process.env.SENTRY_DSN),
+    'import.meta.env.VITE_SENTRY_ENVIRONMENT': JSON.stringify(process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV),
+    'import.meta.env.VITE_SENTRY_RELEASE': JSON.stringify(process.env.SENTRY_RELEASE),
+  },
   server: {
     proxy: {
       '/api': {

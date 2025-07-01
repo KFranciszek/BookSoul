@@ -90,10 +90,10 @@ const LandingPage: React.FC = () => {
             </div>
             <p className="text-blue-200 mb-6 text-lg">{t('quickModeDesc', language)}</p>
             <ul className="text-blue-200 mb-8 space-y-2">
-              <li>• Essential mood & genre matching</li>
-              <li>• Safe content filtering</li>
-              <li>• 5 core questions</li>
-              <li>• Instant recommendations</li>
+              <li>• {t('quickModeFeatures.feature1', language)}</li>
+              <li>• {t('quickModeFeatures.feature2', language)}</li>
+              <li>• {t('quickModeFeatures.feature3', language)}</li>
+              <li>• {t('quickModeFeatures.feature4', language)}</li>
             </ul>
             <button
               onClick={() => handleModeSelection('quick')}
@@ -110,10 +110,10 @@ const LandingPage: React.FC = () => {
             </div>
             <p className="text-blue-200 mb-6 text-lg">{t('cinemaModeDesc', language)}</p>
             <ul className="text-blue-200 mb-8 space-y-2">
-              <li>• Film & series taste analysis</li>
-              <li>• Screen-to-page matching</li>
-              <li>• 2 simple questions</li>
-              <li>• Ultra-fast results</li>
+              <li>• {t('cinemaModeFeatures.feature1', language)}</li>
+              <li>• {t('cinemaModeFeatures.feature2', language)}</li>
+              <li>• {t('cinemaModeFeatures.feature3', language)}</li>
+              <li>• {t('cinemaModeFeatures.feature4', language)}</li>
             </ul>
             <button
               onClick={() => handleModeSelection('cinema')}
@@ -130,10 +130,10 @@ const LandingPage: React.FC = () => {
             </div>
             <p className="text-blue-200 mb-6 text-lg">{t('deepModeDesc', language)}</p>
             <ul className="text-blue-200 mb-8 space-y-2">
-              <li>• Complete psychological profiling</li>
-              <li>• Stress & emotional state analysis</li>
-              <li>• 15+ detailed questions</li>
-              <li>• Therapeutic book matching</li>
+              <li>• {t('deepModeFeatures.feature1', language)}</li>
+              <li>• {t('deepModeFeatures.feature2', language)}</li>
+              <li>• {t('deepModeFeatures.feature3', language)}</li>
+              <li>• {t('deepModeFeatures.feature4', language)}</li>
             </ul>
             <button
               onClick={() => handleModeSelection('deep')}

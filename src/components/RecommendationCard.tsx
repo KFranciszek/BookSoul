@@ -24,7 +24,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
   if (!book) {
     return (
       <div className="bg-white rounded-3xl shadow-lg p-6">
-        <p className="text-gray-500">Loading recommendation...</p>
+        <p className="text-gray-500">{t('loadingRecommendation', language)}</p>
       </div>
     );
   }
@@ -36,20 +36,20 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
     return 'text-gray-600 bg-gray-100';
   };
 
-  // FIXED: Add fallback values for potentially undefined properties
-  const safeGenres = book.genres || book.genre || ['Fiction'];
-  const safeMatchingSteps = book.matchingSteps || ['Matches your reading preferences'];
+  // FIXED: Add fallback values for potentially undefined properties with proper translations
+  const safeGenres = book.genres || book.genre || [t('defaultGenre', language)];
+  const safeMatchingSteps = book.matchingSteps || [t('defaultMatchingStep', language)];
   const safePsychologicalMatch = book.psychologicalMatch || {
-    moodAlignment: 'Complements your current emotional state',
-    cognitiveMatch: 'Matches your cognitive preferences',
-    therapeuticValue: 'Supports your reading goals',
-    personalityFit: 'Appeals to your personality traits'
+    moodAlignment: t('defaultMoodAlignment', language),
+    cognitiveMatch: t('defaultCognitiveMatch', language),
+    therapeuticValue: t('defaultTherapeuticValue', language),
+    personalityFit: t('defaultPersonalityFit', language)
   };
   const safeBookDetails = book.bookDetails || {
-    readingTime: '4-6 hours',
-    length: 'Medium (300 pages)',
-    difficulty: 'Moderate',
-    format: ['Physical', 'E-book']
+    readingTime: t('defaultReadingTime', language),
+    length: t('defaultLength', language),
+    difficulty: t('defaultDifficulty', language),
+    format: [t('physicalBook', language), t('ebook', language)]
   };
   const safePurchaseLinks = book.purchaseLinks || {};
 
@@ -61,7 +61,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
           <div className="flex-shrink-0">
             <img
               src={book.coverUrl || 'https://images.pexels.com/photos/1741230/pexels-photo-1741230.jpeg?auto=compress&cs=tinysrgb&w=400'}
-              alt={`${book.title} cover`}
+              alt={`${book.title} ${t('coverAlt', language)}`}
               className="w-32 h-48 object-cover rounded-2xl shadow-md mx-auto md:mx-0"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -75,7 +75,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-1">{book.title}</h3>
-                <p className="text-lg text-gray-600 mb-3">by {book.author}</p>
+                <p className="text-lg text-gray-600 mb-3">{t('byAuthor', language)} {book.author}</p>
               </div>
               
               <div className={`flex items-center px-3 py-1 rounded-full ${getMatchColor(book.matchScore || 75)}`}>
@@ -101,7 +101,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
             </div>
 
             <p className="text-gray-700 mb-4 leading-relaxed">
-              {book.personalizedDescription || book.description || 'A great book recommendation for you.'}
+              {book.personalizedDescription || book.description || t('recommendationFallback', language)}
             </p>
 
             <div className="flex flex-wrap gap-2 mb-4">
@@ -128,7 +128,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
               className="flex items-center text-teal-600 font-medium hover:text-teal-700 transition-colors mb-4 mt-4"
             >
               <Brain className="w-5 h-5 mr-1" />
-              {showPsychology ? 'Hide Psychology Match' : 'Show Psychology Match'}
+              {showPsychology ? t('hidePsychologyMatch', language) : t('showPsychologyMatch', language)}
               {showPsychology ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
             </button>
 
@@ -141,11 +141,11 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <h5 className="font-medium text-gray-700 mb-1">Mood Alignment</h5>
+                    <h5 className="font-medium text-gray-700 mb-1">{t('moodAlignment', language)}</h5>
                     <p className="text-sm text-gray-600">{safePsychologicalMatch.moodAlignment}</p>
                   </div>
                   <div>
-                    <h5 className="font-medium text-gray-700 mb-1">Cognitive Match</h5>
+                    <h5 className="font-medium text-gray-700 mb-1">{t('cognitiveMatch', language)}</h5>
                     <p className="text-sm text-gray-600">{safePsychologicalMatch.cognitiveMatch}</p>
                   </div>
                   <div>
@@ -153,7 +153,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     <p className="text-sm text-gray-600">{safePsychologicalMatch.therapeuticValue}</p>
                   </div>
                   <div>
-                    <h5 className="font-medium text-gray-700 mb-1">Personality Fit</h5>
+                    <h5 className="font-medium text-gray-700 mb-1">{t('personalityFit', language)}</h5>
                     <p className="text-sm text-gray-600">{safePsychologicalMatch.personalityFit}</p>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
             {/* Matching Steps */}
             {showDetails && (
               <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
-                <h4 className="font-semibold text-gray-800 mb-3">Why this book matches you:</h4>
+                <h4 className="font-semibold text-gray-800 mb-3">{t('whyThisMatches', language)}</h4>
                 <ul className="space-y-2">
                   {safeMatchingSteps.map((step, index) => (
                     <li key={index} className="flex items-start">
@@ -205,7 +205,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   className="flex items-center px-4 py-2 bg-yellow-500 text-white rounded-2xl font-medium hover:bg-yellow-600 transition-colors"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Amazon
+                  {t('amazon', language)}
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </a>
               )}
@@ -218,7 +218,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   className="flex items-center px-4 py-2 bg-red-500 text-white rounded-2xl font-medium hover:bg-red-600 transition-colors"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  Empik
+                  {t('empik', language)}
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </a>
               )}
@@ -231,7 +231,7 @@ const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   className="flex items-center px-4 py-2 bg-green-500 text-white rounded-2xl font-medium hover:bg-green-600 transition-colors"
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
-                  TaniaKsiążka
+                  {t('taniaKsiazka', language)}
                   <ExternalLink className="w-4 h-4 ml-2" />
                 </a>
               )}

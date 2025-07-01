@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ThumbsDown, Meh, ThumbsUp } from 'lucide-react';
+import { useAppContext } from '../contexts/AppContext';
+import { t } from '../utils/translations';
 
 interface RatingComponentProps {
   bookId: string;
@@ -15,6 +17,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
   disabled = false
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { language } = useAppContext();
 
   // LOGGING: Track prop changes
   useEffect(() => {
@@ -75,21 +78,21 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
     const configs = {
       0: {
         icon: ThumbsDown,
-        label: 'Not for me',
+        label: t('notForMe', language),
         color: isSelected ? 'text-red-600 bg-red-100' : 'text-gray-400 hover:text-red-500 hover:bg-red-50',
-        description: 'This recommendation missed the mark'
+        description: t('notForMeDesc', language)
       },
       1: {
         icon: Meh,
-        label: 'It\'s okay',
+        label: t('itsOkay', language),
         color: isSelected ? 'text-yellow-600 bg-yellow-100' : 'text-gray-400 hover:text-yellow-500 hover:bg-yellow-50',
-        description: 'Neutral - might be worth considering'
+        description: t('itsOkayDesc', language)
       },
       2: {
         icon: ThumbsUp,
-        label: 'Perfect match!',
+        label: t('perfectMatch', language),
         color: isSelected ? 'text-green-600 bg-green-100' : 'text-gray-400 hover:text-green-500 hover:bg-green-50',
-        description: 'Exactly what I was looking for!'
+        description: t('perfectMatchDesc', language)
       }
     };
     return configs[rating as keyof typeof configs];
@@ -97,7 +100,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
 
   return (
     <div className="mt-4 p-4 bg-gray-50 rounded-2xl">
-      <h4 className="text-sm font-medium text-gray-700 mb-3">How does this recommendation feel to you?</h4>
+      <h4 className="text-sm font-medium text-gray-700 mb-3">{t('ratingQuestion', language)}</h4>
       
       <div className="flex gap-2">
         {[0, 1, 2].map((rating) => {
@@ -136,9 +139,9 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
       {currentRating !== null && currentRating !== undefined && (
         <div className="mt-3 text-center">
           <p className="text-sm text-gray-600">
-            {currentRating === 0 && "Thanks for the feedback! We'll improve our recommendations."}
-            {currentRating === 1 && "Got it! We'll keep refining to better match your taste."}
-            {currentRating === 2 && "Wonderful! We're learning what works for you."}
+            {currentRating === 0 && t('thanksFeedback', language)}
+            {currentRating === 1 && t('gotItRefining', language)}
+            {currentRating === 2 && t('wonderfulLearning', language)}
           </p>
         </div>
       )}
@@ -146,7 +149,7 @@ const RatingComponent: React.FC<RatingComponentProps> = ({
       {isSubmitting && (
         <div className="mt-2 flex items-center justify-center">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-sm text-gray-600">Saving your feedback...</span>
+          <span className="ml-2 text-sm text-gray-600">{t('savingFeedback', language)}</span>
         </div>
       )}
     </div>

@@ -157,7 +157,7 @@ const Survey: React.FC = () => {
       onBack={handleBack}
       canProceed={surveyData.dataConsent && !isGenerating}
       isLoading={isGenerating}
-      loadingText="AI Processing in Progress..."
+      loadingText={t('aiProcessing', language)}
     >
       <div className="space-y-6">
         <div className="flex items-start">
@@ -179,22 +179,22 @@ const Survey: React.FC = () => {
             <div className="flex items-start">
               <AlertTriangle className="w-6 h-6 text-red-600 mr-3 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-red-800 font-medium mb-2">AI Recommendation Service Unavailable</p>
+                <p className="text-red-800 font-medium mb-2">{t('aiServiceUnavailable', language)}</p>
                 <p className="text-red-700 text-sm mb-3">{errorMessage}</p>
                 <div className="text-red-600 text-sm">
-                  <p className="font-medium mb-1">Possible solutions:</p>
+                  <p className="font-medium mb-1">{t('possibleSolutions', language)}</p>
                   <ul className="list-disc list-inside space-y-1">
-                    <li>Check if the OpenAI API key is properly configured</li>
-                    <li>Verify your OpenAI account has sufficient credits</li>
-                    <li>Ensure the backend server has internet access</li>
-                    <li>Try again in a few minutes</li>
+                    <li>{t('checkApiKey', language)}</li>
+                    <li>{t('verifyCredits', language)}</li>
+                    <li>{t('ensureInternet', language)}</li>
+                    <li>{t('tryAgainLater', language)}</li>
                   </ul>
                 </div>
                 <button
                   onClick={() => setErrorMessage('')}
                   className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700 transition-colors"
                 >
-                  Try Again
+                  {t('tryAgain', language)}
                 </button>
               </div>
             </div>
@@ -206,7 +206,7 @@ const Survey: React.FC = () => {
             <div className="flex items-center">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
               <div>
-                <p className="text-blue-800 font-medium">AI Processing in Progress...</p>
+                <p className="text-blue-800 font-medium">{t('aiProcessingInProgress', language)}</p>
               </div>
             </div>
           </div>
@@ -254,7 +254,7 @@ const Survey: React.FC = () => {
                           type="button"
                           onClick={() => removeCinemaFilm(index)}
                           className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                          title="Remove this film"
+                          title={t('removeFilm', language)}
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -282,7 +282,7 @@ const Survey: React.FC = () => {
 
                 <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-700">
-                    📊 Wypełnione filmy: {filledFilmsCount}/2 (minimum wymagane)
+                    📊 {t('filledFilms', language)}: {filledFilmsCount}/2 ({t('minimumRequired', language)})
                   </p>
                 </div>
               </div>
@@ -446,7 +446,7 @@ const Survey: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center mb-4">
                   <Shield className="w-6 h-6 text-orange-500 mr-3" />
-                  <span className="text-gray-600">Select any content you'd prefer to avoid for your wellbeing</span>
+                  <span className="text-gray-600">{t('contentFilteringDesc', language)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(t('commonTriggers', language) as Record<string, string>).map(([key, trigger]) => (
@@ -569,7 +569,7 @@ const Survey: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center mb-4">
                   <Shield className="w-6 h-6 text-orange-500 mr-3" />
-                  <span className="text-gray-600">Select any content you'd prefer to avoid for your wellbeing</span>
+                  <span className="text-gray-600">{t('contentFilteringDesc', language)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(t('commonTriggers', language) as Record<string, string>).map(([key, trigger]) => (
@@ -746,17 +746,12 @@ const Survey: React.FC = () => {
               canProceed={!!surveyData.finishBooks}
             >
               <div className="grid gap-4">
-                {[
-                  { key: 'always', label: 'Always - I finish every book I start' },
-                  { key: 'usually', label: 'Usually - Most books get finished' },
-                  { key: 'sometimes', label: 'Sometimes - Depends on the book' },
-                  { key: 'rarely', label: 'Rarely - I often abandon books' }
-                ].map((option) => (
+                {Object.entries(t('finishBooksOptions', language) as Record<string, string>).map(([key, option]) => (
                   <OptionButton
-                    key={option.key}
-                    option={option.label}
-                    selected={surveyData.finishBooks === option.key}
-                    onClick={() => setSurveyData({ finishBooks: option.key })}
+                    key={key}
+                    option={option}
+                    selected={surveyData.finishBooks === key}
+                    onClick={() => setSurveyData({ finishBooks: key })}
                     icon={<Target className="w-6 h-6" />}
                   />
                 ))}
@@ -801,7 +796,7 @@ const Survey: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center mb-4">
                   <Lightbulb className="w-6 h-6 text-blue-500 mr-3" />
-                  <span className="text-gray-600">Select topics you'd like to explore</span>
+                  <span className="text-gray-600">{t('learningTopicsDesc', language)}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {Object.entries(t('wantToLearnOptions', language) as Record<string, string>).map(([key, topic]) => (
@@ -834,17 +829,12 @@ const Survey: React.FC = () => {
               canProceed={!!surveyData.difficultyLevel}
             >
               <div className="grid gap-4">
-                {[
-                  { key: 'easy', label: 'Easy - Light, accessible reading' },
-                  { key: 'moderate', label: 'Moderate - Some challenge is good' },
-                  { key: 'challenging', label: 'Challenging - I like to work for it' },
-                  { key: 'academic', label: 'Academic - Bring on the complexity' }
-                ].map((option) => (
+                {Object.entries(t('difficultyLevelOptions', language) as Record<string, string>).map(([key, option]) => (
                   <OptionButton
-                    key={option.key}
-                    option={option.label}
-                    selected={surveyData.difficultyLevel === option.key}
-                    onClick={() => setSurveyData({ difficultyLevel: option.key })}
+                    key={key}
+                    option={option}
+                    selected={surveyData.difficultyLevel === key}
+                    onClick={() => setSurveyData({ difficultyLevel: key })}
                     icon={<TrendingUp className="w-6 h-6" />}
                   />
                 ))}

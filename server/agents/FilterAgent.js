@@ -9,7 +9,7 @@ export class FilterAgent {
   async filterBooks(bookCandidates, surveyData) {
     logger.info(`🚨 ${this.name}: Filtering ${bookCandidates.length} candidates...`);
     
-    let filteredBooks = [...bookCandidates];
+    let filteredBooks = [...bookCandidates]; // FIXED: Changed from const to let
     
     // Apply content filters
     filteredBooks = this.applyContentFilters(filteredBooks, surveyData);

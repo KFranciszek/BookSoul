@@ -36,7 +36,7 @@ const SurveyStep: React.FC<SurveyStepProps> = ({
         <div className="mb-8">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-600">
-              Step {stepNumber} of {totalSteps}
+              {t('stepOf', language).replace('{current}', stepNumber.toString()).replace('{total}', totalSteps.toString())}
             </span>
             <span className="text-sm font-medium text-gray-600">
               {Math.round((stepNumber / totalSteps) * 100)}%
@@ -82,11 +82,11 @@ const SurveyStep: React.FC<SurveyStepProps> = ({
             {isLoading ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                {loadingText || 'Processing...'}
+                {loadingText || t('processing', language)}
               </>
             ) : (
               <>
-                {stepNumber === totalSteps ? t('getRecommendations', language) : t('next', language)}
+                {stepNumber === totalSteps ? t('getRecommendations', language) : t('continueButton', language)}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </>
             )}

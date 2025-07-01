@@ -11,6 +11,26 @@ export const translations = {
     deepMode: "Deep Analysis (7-12 mins)",
     deepModeDesc: "Psychologically aware matching",
     
+    // Mode feature lists
+    quickModeFeatures: {
+      feature1: "Essential mood & genre matching",
+      feature2: "Safe content filtering",
+      feature3: "5 core questions",
+      feature4: "Instant recommendations"
+    },
+    cinemaModeFeatures: {
+      feature1: "Film & series taste analysis",
+      feature2: "Screen-to-page matching",
+      feature3: "2 simple questions",
+      feature4: "Ultra-fast results"
+    },
+    deepModeFeatures: {
+      feature1: "Complete psychological profiling",
+      feature2: "Stress & emotional state analysis",
+      feature3: "15+ detailed questions",
+      feature4: "Therapeutic book matching"
+    },
+    
     // Features Section
     aiPsychologyTitle: "AI Psychology",
     aiPsychologyDesc: "Advanced analysis of your reading psychology and emotional needs",
@@ -68,6 +88,99 @@ export const translations = {
     disappointingBooks: "Any books that didn't work for you?",
     personalityType: "How would you describe your personality?",
     learningTopics: "What would you like to explore or learn?",
+    
+    // Recommendations Page
+    recommendationsTitle: "Your Soul-Matched Books",
+    recommendationsSubtitle: "Based on your unique psychological profile and reading needs",
+    personalizedJustForYou: "Personalized just for you",
+    quickMatch: "Quick Match",
+    deepAnalysis: "Deep Analysis",
+    cinematch: "CineMatch™",
+    results: "Results",
+    complete: "Complete",
+    helpUs: "Help us",
+    improve: "improve",
+    quickMatchResults: "These recommendations focus on your core preferences and mood. For even more personalized suggestions, try our Deep Analysis mode next time!",
+    deepAnalysisResults: "These recommendations are based on your comprehensive psychological profile, including stress levels, emotional needs, and reading psychology.",
+    cinematchResults: "These books capture the same storytelling magic as your favorite films and series. Each recommendation is chosen to give you that same emotional experience you love on screen!",
+    helpUsImprove: "Rate each recommendation to help our AI learn your preferences better. Your feedback makes future recommendations even more accurate!",
+    refinePreferences: "Refine Preferences",
+    startNewSearch: "Start New Search",
+    happyReading: "Happy Reading",
+    bestBookQuote: "Remember, the best book is the one that speaks to you in this moment of your journey.",
+    lovedCinemaPicks: "🎬 Loved these film-inspired picks? Try our Deep Analysis for even more personalized recommendations!",
+    wantBetterMatches: "💡 Want even better matches? Try our Deep Analysis mode for your next book search!",
+    
+    // Rating Component
+    ratingQuestion: "How does this recommendation feel to you?",
+    notForMe: "Not for me",
+    itsOkay: "It's okay",
+    perfectMatch: "Perfect match!",
+    notForMeDesc: "This recommendation missed the mark",
+    itsOkayDesc: "Neutral - might be worth considering",
+    perfectMatchDesc: "Exactly what I was looking for!",
+    thanksFeedback: "Thanks for the feedback! We'll improve our recommendations.",
+    gotItRefining: "Got it! We'll keep refining to better match your taste.",
+    wonderfulLearning: "Wonderful! We're learning what works for you.",
+    savingFeedback: "Saving your feedback...",
+    
+    // Book Details
+    showPsychologyMatch: "Show Psychology Match",
+    hidePsychologyMatch: "Hide Psychology Match",
+    showMore: "Show More",
+    showLess: "Show Less",
+    whyThisMatches: "Why this book matches you:",
+    moodAlignment: "Mood Alignment",
+    cognitiveMatch: "Cognitive Match",
+    therapeuticValue: "Therapeutic Value",
+    personalityFit: "Personality Fit",
+    recommendationFallback: "A great book recommendation for you.",
+    loadingRecommendation: "Loading recommendation...",
+    byAuthor: "by",
+    coverAlt: "cover",
+    
+    // Default fallbacks for book details
+    defaultGenre: "Fiction",
+    defaultMatchingStep: "Matches your reading preferences",
+    defaultMoodAlignment: "Complements your current emotional state",
+    defaultCognitiveMatch: "Matches your cognitive preferences",
+    defaultTherapeuticValue: "Supports your reading goals",
+    defaultPersonalityFit: "Appeals to your personality traits",
+    defaultReadingTime: "4-6 hours",
+    defaultLength: "Medium (300 pages)",
+    defaultDifficulty: "Moderate",
+    physicalBook: "Physical",
+    ebook: "E-book",
+    
+    // Purchase Links
+    amazon: "Amazon",
+    empik: "Empik",
+    taniaKsiazka: "TaniaKsiążka",
+    
+    // Survey Steps
+    stepOf: "Step {current} of {total}",
+    continueButton: "Continue",
+    processing: "Processing...",
+    
+    // AI Processing Messages
+    aiProcessing: "AI Book Recommendation Analysis",
+    aiProcessingInProgress: "AI Processing in Progress...",
+    aiServiceUnavailable: "AI Recommendation Service Unavailable",
+    possibleSolutions: "Possible solutions:",
+    checkApiKey: "Check if the OpenAI API key is properly configured",
+    verifyCredits: "Verify your OpenAI account has sufficient credits",
+    ensureInternet: "Ensure the backend server has internet access",
+    tryAgainLater: "Try again in a few minutes",
+    tryAgain: "Try Again",
+    
+    // Cinema Mode Specific
+    removeFilm: "Remove this film",
+    filledFilms: "Filled films",
+    minimumRequired: "minimum required",
+    
+    // Content Filtering
+    contentFilteringDesc: "Select any content you'd prefer to avoid for your wellbeing",
+    learningTopicsDesc: "Select topics you'd like to explore",
     
     // Moods
     moods: {
@@ -240,21 +353,31 @@ export const translations = {
     next: "Continue",
     back: "Back",
     getRecommendations: "Get My Soul-Matched Books",
-    showMore: "Show Matching Psychology",
-    showLess: "Hide Details",
     buyNow: "Find This Book",
     startQuick: "Start Quick Match",
     startCinema: "Start CineMatch™",
     startDeep: "Start Deep Analysis",
     
     // Results
-    recommendationsTitle: "Your Soul-Matched Books",
-    recommendationsSubtitle: "Based on your unique psychological profile and reading needs",
     psychologyMatch: "Psychology Match",
-    therapeuticValue: "Therapeutic Value",
     
     // Data Consent
-    dataConsent: "I consent to anonymous data processing for improving recommendations"
+    dataConsent: "I consent to anonymous data processing for improving recommendations",
+    
+    // Additional Survey Options
+    finishBooksOptions: {
+      always: "Always - I finish every book I start",
+      usually: "Usually - Most books get finished",
+      sometimes: "Sometimes - Depends on the book",
+      rarely: "Rarely - I often abandon books"
+    },
+    
+    difficultyLevelOptions: {
+      easy: "Easy - Light, accessible reading",
+      moderate: "Moderate - Some challenge is good",
+      challenging: "Challenging - I like to work for it",
+      academic: "Academic - Bring on the complexity"
+    }
   },
   pl: {
     // Landing Page
@@ -267,6 +390,26 @@ export const translations = {
     cinemaModeDesc: "Książki inspirowane filmami",
     deepMode: "Głęboka Analiza (7-12 min)",
     deepModeDesc: "Psychologicznie świadome dopasowanie",
+    
+    // Mode feature lists - POLISH TRANSLATIONS ADDED
+    quickModeFeatures: {
+      feature1: "Dopasowanie nastroju i gatunków",
+      feature2: "Bezpieczne filtrowanie treści",
+      feature3: "5 podstawowych pytań",
+      feature4: "Natychmiastowe rekomendacje"
+    },
+    cinemaModeFeatures: {
+      feature1: "Analiza gustów filmowych i serialowych",
+      feature2: "Dopasowanie z ekranu na stronę",
+      feature3: "2 proste pytania",
+      feature4: "Błyskawiczne wyniki"
+    },
+    deepModeFeatures: {
+      feature1: "Kompletne profilowanie psychologiczne",
+      feature2: "Analiza stresu i stanu emocjonalnego",
+      feature3: "15+ szczegółowych pytań",
+      feature4: "Terapeutyczne dopasowanie książek"
+    },
     
     // Features Section
     aiPsychologyTitle: "Psychologia AI",
@@ -325,6 +468,99 @@ export const translations = {
     disappointingBooks: "Czy są książki, które Cię zawiodły?",
     personalityType: "Jak opisałbyś swoją osobowość?",
     learningTopics: "Co chciałbyś poznać lub się nauczyć?",
+    
+    // Recommendations Page
+    recommendationsTitle: "Twoje Dopasowane Książki",
+    recommendationsSubtitle: "Na podstawie Twojego unikalnego profilu psychologicznego i potrzeb czytelniczych",
+    personalizedJustForYou: "Spersonalizowane specjalnie dla Ciebie",
+    quickMatch: "Szybkie Dopasowanie",
+    deepAnalysis: "Głęboka Analiza",
+    cinematch: "CineMatch™",
+    results: "Wyniki",
+    complete: "Zakończona",
+    helpUs: "Pomóż nam się",
+    improve: "poprawić",
+    quickMatchResults: "Te rekomendacje skupiają się na Twoich podstawowych preferencjach i nastroju. Aby uzyskać jeszcze bardziej spersonalizowane sugestie, wypróbuj następnym razem nasz tryb Głębokiej Analizy!",
+    deepAnalysisResults: "Te rekomendacje opierają się na Twoim kompleksowym profilu psychologicznym, uwzględniając poziom stresu, potrzeby emocjonalne i psychologię czytania.",
+    cinematchResults: "Te książki oddają tę samą magię opowiadania, co Twoje ulubione filmy i seriale. Każda rekomendacja została wybrana tak, aby dać Ci to samo doświadczenie emocjonalne, które kochasz na ekranie!",
+    helpUsImprove: "Oceń każdą rekomendację, aby pomóc naszej AI lepiej poznać Twoje preferencje. Twoja opinia sprawia, że przyszłe rekomendacje są jeszcze dokładniejsze!",
+    refinePreferences: "Doprecyzuj Preferencje",
+    startNewSearch: "Rozpocznij Nowe Wyszukiwanie",
+    happyReading: "Miłego Czytania",
+    bestBookQuote: "Pamiętaj, najlepsza książka to ta, która przemawia do Ciebie w tym momencie Twojej podróży.",
+    lovedCinemaPicks: "🎬 Podobały Ci się te wybory inspirowane filmami? Wypróbuj naszą Głęboką Analizę, aby uzyskać jeszcze bardziej spersonalizowane rekomendacje!",
+    wantBetterMatches: "💡 Chcesz jeszcze lepsze dopasowania? Wypróbuj nasz tryb Głębokiej Analizy przy następnym wyszukiwaniu książek!",
+    
+    // Rating Component
+    ratingQuestion: "Jak odbierasz tę rekomendację?",
+    notForMe: "Nie dla mnie",
+    itsOkay: "W porządku",
+    perfectMatch: "Idealne dopasowanie!",
+    notForMeDesc: "Ta rekomendacja chybiła w cel",
+    itsOkayDesc: "Neutralnie - może warto rozważyć",
+    perfectMatchDesc: "Dokładnie tego szukałem!",
+    thanksFeedback: "Dzięki za opinię! Poprawimy nasze rekomendacje.",
+    gotItRefining: "Rozumiem! Będziemy dalej doskonalić, aby lepiej dopasować się do Twojego gustu.",
+    wonderfulLearning: "Wspaniale! Uczymy się, co dla Ciebie działa.",
+    savingFeedback: "Zapisywanie Twojej opinii...",
+    
+    // Book Details
+    showPsychologyMatch: "Pokaż Dopasowanie Psychologiczne",
+    hidePsychologyMatch: "Ukryj Dopasowanie Psychologiczne",
+    showMore: "Pokaż Więcej",
+    showLess: "Pokaż Mniej",
+    whyThisMatches: "Dlaczego ta książka do Ciebie pasuje:",
+    moodAlignment: "Dopasowanie Nastroju",
+    cognitiveMatch: "Dopasowanie Poznawcze",
+    therapeuticValue: "Wartość Terapeutyczna",
+    personalityFit: "Dopasowanie Osobowości",
+    recommendationFallback: "Świetna rekomendacja książki dla Ciebie.",
+    loadingRecommendation: "Ładowanie rekomendacji...",
+    byAuthor: "autorstwa",
+    coverAlt: "okładka",
+    
+    // Default fallbacks for book details (Polish)
+    defaultGenre: "Fikcja",
+    defaultMatchingStep: "Pasuje do Twoich preferencji czytelniczych",
+    defaultMoodAlignment: "Dopasowuje się do Twojego obecnego stanu emocjonalnego",
+    defaultCognitiveMatch: "Pasuje do Twoich preferencji poznawczych",
+    defaultTherapeuticValue: "Wspiera Twoje cele czytelnicze",
+    defaultPersonalityFit: "Przemawia do cech Twojej osobowości",
+    defaultReadingTime: "4-6 godzin",
+    defaultLength: "Średnia (300 stron)",
+    defaultDifficulty: "Umiarkowana",
+    physicalBook: "Fizyczna",
+    ebook: "E-book",
+    
+    // Purchase Links
+    amazon: "Amazon",
+    empik: "Empik",
+    taniaKsiazka: "TaniaKsiążka",
+    
+    // Survey Steps
+    stepOf: "Krok {current} z {total}",
+    continueButton: "Dalej",
+    processing: "Przetwarzanie...",
+    
+    // AI Processing Messages
+    aiProcessing: "Analiza Rekomendacji Książek",
+    aiProcessingInProgress: "Trwa Analiza Rekomendacji Książek...",
+    aiServiceUnavailable: "Usługa Rekomendacji AI Niedostępna",
+    possibleSolutions: "Możliwe rozwiązania:",
+    checkApiKey: "Sprawdź, czy klucz API OpenAI jest prawidłowo skonfigurowany",
+    verifyCredits: "Zweryfikuj, czy Twoje konto OpenAI ma wystarczające środki",
+    ensureInternet: "Upewnij się, że serwer backend ma dostęp do internetu",
+    tryAgainLater: "Spróbuj ponownie za kilka minut",
+    tryAgain: "Spróbuj Ponownie",
+    
+    // Cinema Mode Specific
+    removeFilm: "Usuń ten film",
+    filledFilms: "Wypełnione filmy",
+    minimumRequired: "minimum wymagane",
+    
+    // Content Filtering
+    contentFilteringDesc: "Wybierz treści, których wolałbyś unikać dla swojego dobrostanu",
+    learningTopicsDesc: "Wybierz tematy, które chciałbyś poznać",
     
     // Moods (Polish)
     moods: {
@@ -497,21 +733,31 @@ export const translations = {
     next: "Dalej",
     back: "Wstecz",
     getRecommendations: "Pokaż Moje Dopasowane Książki",
-    showMore: "Pokaż Psychologię Dopasowania",
-    showLess: "Ukryj Szczegóły",
     buyNow: "Znajdź Tę Książkę",
     startQuick: "Rozpocznij Szybkie Dopasowanie",
     startCinema: "Rozpocznij CineMatch™",
     startDeep: "Rozpocznij Głęboką Analizę",
     
     // Results (Polish)
-    recommendationsTitle: "Twoje Dopasowane Książki",
-    recommendationsSubtitle: "Na podstawie Twojego unikalnego profilu psychologicznego i potrzeb czytelniczych",
     psychologyMatch: "Dopasowanie Psychologiczne",
-    therapeuticValue: "Wartość Terapeutyczna",
     
     // Data Consent (Polish)
-    dataConsent: "Wyrażam zgodę na anonimowe przetwarzanie danych w celu poprawy rekomendacji"
+    dataConsent: "Wyrażam zgodę na anonimowe przetwarzanie danych w celu poprawy rekomendacji",
+    
+    // Additional Survey Options (Polish)
+    finishBooksOptions: {
+      always: "Zawsze - Kończę każdą książkę, którą zaczynam",
+      usually: "Zazwyczaj - Większość książek zostaje skończona",
+      sometimes: "Czasami - Zależy od książki",
+      rarely: "Rzadko - Często porzucam książki"
+    },
+    
+    difficultyLevelOptions: {
+      easy: "Łatwe - Lekka, przystępna lektura",
+      moderate: "Umiarkowane - Trochę wyzwania jest dobre",
+      challenging: "Wymagające - Lubię się napracować",
+      academic: "Akademickie - Niech będzie skomplikowanie"
+    }
   }
 };
 

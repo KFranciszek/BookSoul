@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { SurveyData, BookRecommendation, UserProfile } from '../types';
+import { setUserContext, addBreadcrumb } from '../utils/sentry';
 
 interface AppContextType {
   currentStep: number;
@@ -35,28 +36,103 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [sessionId, setSessionId] = useState<string | null>(null);
 
   const updateSurveyData = (data: Partial<SurveyData>) => {
-    setSurveyData(prev => ({ ...prev, ...data }));
+    setSurveyData(prev => {
+      const newData = { ...prev, ...data };
+      
+      // Add Sentry breadcrumb for survey data updates
+      addBreadcrumb(
+        'Survey data updated',
+        'user_action',
+        {
+          step: currentStep,
+          mode: newData.surveyMode,
+          updatedFields: Object.keys(data)
+        }
+      );
+      
+      return newData;
+    });
   };
 
   const updateUserProfile = (profile: Partial<UserProfile>) => {
     setUserProfile(prev => ({ ...prev, ...profile }));
   };
 
+  const updateCurrentStep = (step: number) => {
+    setCurrentStep(step);
+    
+    // Add Sentry breadcrumb for step changes
+    addBreadcrumb(
+      `Navigation: Step ${step}`,
+      'navigation',
+      {
+        previousStep: currentStep,
+        newStep: step,
+        stepName: step === 0 ? 'landing' : step === 1 ? 'survey' : step === 2 ? 'recommendations' : 'unknown'
+      }
+    );
+  };
+
+  const updateSessionId = (newSessionId: string | null) => {
+    setSessionId(newSessionId);
+    
+    if (newSessionId) {
+      // Update Sentry user context when session is created
+      setUserContext({
+        sessionId: newSessionId,
+        email: surveyData.userEmail
+      });
+      
+      addBreadcrumb(
+        'Session created',
+        'user_action',
+        {
+          sessionId: newSessionId,
+          mode: surveyData.surveyMode
+        }
+      );
+    }
+  };
+
+  const updateRecommendations = (newRecommendations: BookRecommendation[]) => {
+    setRecommendations(newRecommendations);
+    
+    // Add Sentry breadcrumb for recommendations received
+    addBreadcrumb(
+      'Recommendations received',
+      'user_action',
+      {
+        count: newRecommendations.length,
+        sessionId,
+        mode: surveyData.surveyMode
+      }
+    );
+  };
+
+  // Update Sentry context when language changes
+  useEffect(() => {
+    addBreadcrumb(
+      `Language changed to ${language}`,
+      'user_action',
+      { language }
+    );
+  }, [language]);
+
   return (
     <AppContext.Provider
       value={{
         currentStep,
-        setCurrentStep,
+        setCurrentStep: updateCurrentStep,
         surveyData,
         setSurveyData: updateSurveyData,
         recommendations,
-        setRecommendations,
+        setRecommendations: updateRecommendations,
         userProfile,
         setUserProfile: updateUserProfile,
         language,
         setLanguage,
         sessionId,
-        setSessionId,
+        setSessionId: updateSessionId,
       }}
     >
       {children}
