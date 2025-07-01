@@ -1,6 +1,6 @@
 export interface SurveyData {
   // Mode selection
-  surveyMode: 'quick' | 'deep' | 'cinema';
+  surveyMode: 'quick' | 'deep' | 'cinema' | 'bookInspiration';
   
   // Required fields for both modes
   favoriteGenres?: string[];
@@ -12,6 +12,12 @@ export interface SurveyData {
   // Cinema mode specific fields
   favoriteFilms?: string[];
   filmConnection?: string;
+  
+  // Book Inspiration mode specific fields
+  favoriteBooks?: Array<{
+    title: string;
+    whyLoved: string;
+  }>;
   
   // Additional required fields for deep mode
   stressLevel?: string;
@@ -28,7 +34,6 @@ export interface SurveyData {
   moodImprovement?: string;
   
   // Optional fields
-  favoriteBooks?: string;
   favoriteAuthors?: string;
   disappointingBooks?: string;
   literaryMotifs?: string[];
@@ -61,7 +66,7 @@ export interface BookRecommendation {
   personalizedDescription: string;
   matchScore: number;
   matchingSteps: string[];
-  genres: string[]; // FIXED: Standardized to 'genres' (plural)
+  genres: string[];
   psychologicalMatch: {
     moodAlignment: string;
     cognitiveMatch: string;
@@ -85,7 +90,7 @@ export interface UserProfile {
   emotionalState: string;
   personalityTraits: string[];
   readingPreferences: string[];
-  recommendationMode: 'quick' | 'deep' | 'cinema';
+  recommendationMode: 'quick' | 'deep' | 'cinema' | 'bookInspiration';
   psychologicalProfile?: {
     stressLevel: string;
     cognitiveStyle: string;

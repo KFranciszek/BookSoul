@@ -3,6 +3,8 @@ import { useAppContext } from '../contexts/AppContext';
 import { t } from '../utils/translations';
 import SurveyStep from './SurveyStep';
 import LoadingSpinner from './LoadingSpinner';
+import BookInspirationModeSelection from './BookInspirationModeSelection';
+import BookInspirationSurvey from './BookInspirationSurvey';
 import { Heart, Clock, Target, BookOpen, User, Star, Shield, Brain, Zap, Home, Lightbulb, TrendingUp, Smile, Film, Plus, X, Sparkles, AlertTriangle } from 'lucide-react';
 import { useOptimizedRecommendations } from '../hooks/useOptimizedRecommendations';
 
@@ -17,7 +19,8 @@ const Survey: React.FC = () => {
   // Determine total steps based on survey mode
   const isQuickMode = surveyData.surveyMode === 'quick';
   const isCinemaMode = surveyData.surveyMode === 'cinema';
-  const totalSteps = isQuickMode ? 6 : isCinemaMode ? 3 : 16;
+  const isBookInspirationMode = surveyData.surveyMode === 'bookInspiration';
+  const totalSteps = isQuickMode ? 6 : isCinemaMode ? 3 : isBookInspirationMode ? 1 : 16;
 
   // Initialize cinema films when entering cinema mode
   useEffect(() => {
@@ -25,6 +28,15 @@ const Survey: React.FC = () => {
       setCinemaFilms(['', '']);
     }
   }, [isCinemaMode]);
+
+  // Handle Book Inspiration mode routing
+  if (isBookInspirationMode) {
+    if (!surveyData.inspirationMode) {
+      return <BookInspirationModeSelection />;
+    } else if (surveyData.inspirationMode === 'inspireMe') {
+      return <BookInspirationSurvey />;
+    }
+  }
 
   const handleNext = async () => {
     if (currentSurveyStep < totalSteps) {

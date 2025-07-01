@@ -11,7 +11,7 @@ export const validateSurveyData = (req, res, next) => {
   }
   
   // Validate survey mode
-  const validModes = ['quick', 'deep', 'cinema'];
+  const validModes = ['quick', 'deep', 'cinema', 'bookInspiration'];
   if (!validModes.includes(surveyData.surveyMode)) {
     return res.status(400).json({
       success: false,
@@ -78,6 +78,11 @@ function validateModeSpecificData(surveyData) {
           };
         }
       }
+      break;
+
+    case 'bookInspiration':
+      // Add validation for bookInspiration mode if needed
+      // For now, we'll allow it to pass through without specific validation
       break;
   }
   

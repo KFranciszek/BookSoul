@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Sparkles, Heart, RefreshCw, Brain, Target, Film } from 'lucide-react';
+import { ArrowLeft, Sparkles, Heart, RefreshCw, Brain, Target, Film, BookMarked } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { t } from '../utils/translations';
 import RecommendationCard from './RecommendationCard';
@@ -37,6 +37,7 @@ const Recommendations: React.FC = () => {
 
   const isQuickMode = surveyData.surveyMode === 'quick';
   const isCinemaMode = surveyData.surveyMode === 'cinema';
+  const isBookInspirationMode = surveyData.surveyMode === 'bookInspiration';
 
   // Show skeleton loading if no recommendations yet
   if (!recommendations || recommendations.length === 0) {
@@ -91,11 +92,20 @@ const Recommendations: React.FC = () => {
                 <Film className="w-5 h-5 mr-2 text-purple-500" />
               ) : isQuickMode ? (
                 <Target className="w-5 h-5 mr-2 text-orange-500" />
+              ) : isBookInspirationMode ? (
+                <BookMarked className="w-5 h-5 mr-2 text-emerald-500" />
               ) : (
                 <Brain className="w-5 h-5 mr-2 text-teal-500" />
               )}
               <span>
-                {isCinemaMode ? t('cinematch', language) : isQuickMode ? t('quickMatch', language) : t('deepAnalysis', language)}
+                {isCinemaMode 
+                  ? t('cinematch', language) 
+                  : isQuickMode 
+                    ? t('quickMatch', language) 
+                    : isBookInspirationMode
+                      ? t('bookInspiration', language)
+                      : t('deepAnalysis', language)
+                }
               </span>
             </div>
           </div>
@@ -111,6 +121,12 @@ const Recommendations: React.FC = () => {
             <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
               <p className="text-orange-800">
                 <strong>{t('quickMatch', language)} {t('results', language)}:</strong> {t('quickMatchResults', language)}
+              </p>
+            </div>
+          ) : isBookInspirationMode ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-8 max-w-2xl mx-auto">
+              <p className="text-emerald-800">
+                <strong>{t('bookInspiration', language)} {t('results', language)}:</strong> {t('bookInspirationResults', language)}
               </p>
             </div>
           ) : (
@@ -175,6 +191,10 @@ const Recommendations: React.FC = () => {
           ) : isQuickMode ? (
             <p className="text-sm text-orange-600 mt-2">
               {t('wantBetterMatches', language)}
+            </p>
+          ) : isBookInspirationMode ? (
+            <p className="text-sm text-emerald-600 mt-2">
+              {t('lovedBookInspiration', language)}
             </p>
           ) : null}
         </div>

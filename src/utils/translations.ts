@@ -10,6 +10,8 @@ export const translations = {
     cinemaModeDesc: "Film-inspired book matching",
     deepMode: "Deep Analysis (7-12 mins)",
     deepModeDesc: "Psychologically aware matching",
+    bookInspirations: "Book Inspirations",
+    bookInspirationsDesc: "Get inspired by your favorite reads",
     
     // Mode feature lists
     quickModeFeatures: {
@@ -30,6 +32,33 @@ export const translations = {
       feature3: "15+ detailed questions",
       feature4: "Therapeutic book matching"
     },
+    bookInspirationsFeatures: {
+      feature1: "Based on your favorite books",
+      feature2: "AI analyzes what you loved",
+      feature3: "Discover similar gems",
+      feature4: "Expand your reading horizons"
+    },
+    
+    // Book Inspirations Mode Selection
+    chooseInspirationType: "Choose Your Inspiration Source",
+    myBookshelf: "My Bookshelf",
+    myBookshelfDesc: "Integration with Goodreads/LubimyCzytać",
+    myBookshelfStatus: "Coming soon in development",
+    inspireMe: "Inspire Me",
+    inspireMeDesc: "Share your favorite books and get new inspirations",
+    inspireMeFullDesc: "Tell us about the books that captivated you, and we'll find similar treasures that match what you loved about them",
+    
+    // Book Inspirations Survey
+    favoriteBooks: "What books have you loved recently?",
+    favoriteBooksDesc: "Share at least 3 books that left a lasting impression on you",
+    bookTitle: "Book Title",
+    bookTitlePlaceholder: "e.g., The Seven Husbands of Evelyn Hugo",
+    whyLoved: "Why did you love this book?",
+    whyLovedPlaceholder: "e.g., The complex characters, emotional depth, beautiful writing style...",
+    addAnotherBook: "Add another book",
+    removeBook: "Remove this book",
+    minimumBooks: "Please add at least 3 books",
+    booksAdded: "Books added",
     
     // Features Section
     aiPsychologyTitle: "AI Psychology",
@@ -83,7 +112,6 @@ export const translations = {
     moodImprovement: "Would you like books to lift your spirits?",
     
     // Optional Fields
-    favoriteBooks: "What are some books that touched your soul?",
     favoriteAuthors: "Authors whose voices resonate with you?",
     disappointingBooks: "Any books that didn't work for you?",
     personalityType: "How would you describe your personality?",
@@ -96,6 +124,7 @@ export const translations = {
     quickMatch: "Quick Match",
     deepAnalysis: "Deep Analysis",
     cinematch: "CineMatch™",
+    bookInspiration: "Book Inspiration",
     results: "Results",
     complete: "Complete",
     helpUs: "Help us",
@@ -103,6 +132,7 @@ export const translations = {
     quickMatchResults: "These recommendations focus on your core preferences and mood. For even more personalized suggestions, try our Deep Analysis mode next time!",
     deepAnalysisResults: "These recommendations are based on your comprehensive psychological profile, including stress levels, emotional needs, and reading psychology.",
     cinematchResults: "These books capture the same storytelling magic as your favorite films and series. Each recommendation is chosen to give you that same emotional experience you love on screen!",
+    bookInspirationResults: "These recommendations are inspired by the books you loved. Our AI analyzed what captivated you and found similar treasures that share those magical qualities!",
     helpUsImprove: "Rate each recommendation to help our AI learn your preferences better. Your feedback makes future recommendations even more accurate!",
     refinePreferences: "Refine Preferences",
     startNewSearch: "Start New Search",
@@ -110,6 +140,7 @@ export const translations = {
     bestBookQuote: "Remember, the best book is the one that speaks to you in this moment of your journey.",
     lovedCinemaPicks: "🎬 Loved these film-inspired picks? Try our Deep Analysis for even more personalized recommendations!",
     wantBetterMatches: "💡 Want even better matches? Try our Deep Analysis mode for your next book search!",
+    lovedBookInspiration: "📚 Loved these book-inspired picks? Try our Deep Analysis for even more personalized recommendations!",
     
     // Rating Component
     ratingQuestion: "How does this recommendation feel to you?",
@@ -357,6 +388,7 @@ export const translations = {
     startQuick: "Start Quick Match",
     startCinema: "Start CineMatch™",
     startDeep: "Start Deep Analysis",
+    startBookInspiration: "Start Book Inspiration",
     
     // Results
     psychologyMatch: "Psychology Match",
@@ -390,8 +422,10 @@ export const translations = {
     cinemaModeDesc: "Książki inspirowane filmami",
     deepMode: "Głęboka Analiza (7-12 min)",
     deepModeDesc: "Psychologicznie świadome dopasowanie",
+    bookInspirations: "Inspiracje Książkowe",
+    bookInspirationsDesc: "Zainspiruj się swoimi ulubionymi lekturami",
     
-    // Mode feature lists - POLISH TRANSLATIONS ADDED
+    // Mode feature lists
     quickModeFeatures: {
       feature1: "Dopasowanie nastroju i gatunków",
       feature2: "Bezpieczne filtrowanie treści",
@@ -410,6 +444,33 @@ export const translations = {
       feature3: "15+ szczegółowych pytań",
       feature4: "Terapeutyczne dopasowanie książek"
     },
+    bookInspirationsFeatures: {
+      feature1: "Na podstawie Twoich ulubionych książek",
+      feature2: "AI analizuje to, co pokochałeś",
+      feature3: "Odkryj podobne perełki",
+      feature4: "Poszerz swoje czytelnicze horyzonty"
+    },
+    
+    // Book Inspirations Mode Selection
+    chooseInspirationType: "Wybierz Źródło Inspiracji",
+    myBookshelf: "Moja Półka Książek",
+    myBookshelfDesc: "Integracja z Goodreads/LubimyCzytać",
+    myBookshelfStatus: "Wkrótce w trakcie developmentu",
+    inspireMe: "Zainspiruj Mnie",
+    inspireMeDesc: "Podziel się swoimi ulubionymi książkami i otrzymaj nowe inspiracje",
+    inspireMeFullDesc: "Opowiedz nam o książkach, które Cię urzekły, a znajdziemy podobne skarby, które pasują do tego, co w nich pokochałeś",
+    
+    // Book Inspirations Survey
+    favoriteBooks: "Jakie książki ostatnio Ci się podobały?",
+    favoriteBooksDesc: "Podziel się co najmniej 3 książkami, które wywarły na Tobie trwałe wrażenie",
+    bookTitle: "Tytuł Książki",
+    bookTitlePlaceholder: "np. Siedem mężów Evelyn Hugo",
+    whyLoved: "Dlaczego pokochałeś tę książkę?",
+    whyLovedPlaceholder: "np. Złożone postacie, głębia emocjonalna, piękny styl pisania...",
+    addAnotherBook: "Dodaj kolejną książkę",
+    removeBook: "Usuń tę książkę",
+    minimumBooks: "Dodaj co najmniej 3 książki",
+    booksAdded: "Dodane książki",
     
     // Features Section
     aiPsychologyTitle: "Psychologia AI",
@@ -463,7 +524,6 @@ export const translations = {
     moodImprovement: "Czy chciałbyś, żeby książki poprawiły Ci humor?",
     
     // Optional Fields
-    favoriteBooks: "Jakie książki dotknęły Twoją duszę?",
     favoriteAuthors: "Autorzy, których głos do Ciebie przemawia?",
     disappointingBooks: "Czy są książki, które Cię zawiodły?",
     personalityType: "Jak opisałbyś swoją osobowość?",
@@ -476,6 +536,7 @@ export const translations = {
     quickMatch: "Szybkie Dopasowanie",
     deepAnalysis: "Głęboka Analiza",
     cinematch: "CineMatch™",
+    bookInspiration: "Inspiracje Książkowe",
     results: "Wyniki",
     complete: "Zakończona",
     helpUs: "Pomóż nam się",
@@ -483,6 +544,7 @@ export const translations = {
     quickMatchResults: "Te rekomendacje skupiają się na Twoich podstawowych preferencjach i nastroju. Aby uzyskać jeszcze bardziej spersonalizowane sugestie, wypróbuj następnym razem nasz tryb Głębokiej Analizy!",
     deepAnalysisResults: "Te rekomendacje opierają się na Twoim kompleksowym profilu psychologicznym, uwzględniając poziom stresu, potrzeby emocjonalne i psychologię czytania.",
     cinematchResults: "Te książki oddają tę samą magię opowiadania, co Twoje ulubione filmy i seriale. Każda rekomendacja została wybrana tak, aby dać Ci to samo doświadczenie emocjonalne, które kochasz na ekranie!",
+    bookInspirationResults: "Te rekomendacje są inspirowane książkami, które pokochałeś. Nasza AI przeanalizowała to, co Cię urzekło i znalazła podobne skarby, które dzielą te magiczne cechy!",
     helpUsImprove: "Oceń każdą rekomendację, aby pomóc naszej AI lepiej poznać Twoje preferencje. Twoja opinia sprawia, że przyszłe rekomendacje są jeszcze dokładniejsze!",
     refinePreferences: "Doprecyzuj Preferencje",
     startNewSearch: "Rozpocznij Nowe Wyszukiwanie",
@@ -490,6 +552,7 @@ export const translations = {
     bestBookQuote: "Pamiętaj, najlepsza książka to ta, która przemawia do Ciebie w tym momencie Twojej podróży.",
     lovedCinemaPicks: "🎬 Podobały Ci się te wybory inspirowane filmami? Wypróbuj naszą Głęboką Analizę, aby uzyskać jeszcze bardziej spersonalizowane rekomendacje!",
     wantBetterMatches: "💡 Chcesz jeszcze lepsze dopasowania? Wypróbuj nasz tryb Głębokiej Analizy przy następnym wyszukiwaniu książek!",
+    lovedBookInspiration: "📚 Podobały Ci się te inspiracje książkowe? Wypróbuj naszą Głęboką Analizę, aby uzyskać jeszcze bardziej spersonalizowane rekomendacje!",
     
     // Rating Component
     ratingQuestion: "Jak odbierasz tę rekomendację?",
@@ -737,6 +800,7 @@ export const translations = {
     startQuick: "Rozpocznij Szybkie Dopasowanie",
     startCinema: "Rozpocznij CineMatch™",
     startDeep: "Rozpocznij Głęboką Analizę",
+    startBookInspiration: "Rozpocznij Inspiracje Książkowe",
     
     // Results (Polish)
     psychologyMatch: "Dopasowanie Psychologiczne",

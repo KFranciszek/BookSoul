@@ -1,12 +1,12 @@
 import React from 'react';
-import { BookOpen, Brain, Heart, Sparkles, Clock, Target, Film } from 'lucide-react';
+import { BookOpen, Brain, Heart, Sparkles, Clock, Target, Film, BookMarked } from 'lucide-react';
 import { useAppContext } from '../contexts/AppContext';
 import { t } from '../utils/translations';
 
 const LandingPage: React.FC = () => {
   const { setCurrentStep, language, setLanguage, setSurveyData } = useAppContext();
 
-  const handleModeSelection = (mode: 'quick' | 'deep' | 'cinema') => {
+  const handleModeSelection = (mode: 'quick' | 'deep' | 'cinema' | 'bookInspiration') => {
     setSurveyData({ surveyMode: mode, dataConsent: false });
     setCurrentStep(1);
   };
@@ -81,8 +81,9 @@ const LandingPage: React.FC = () => {
           <p className="text-xl text-blue-200 mb-8">{t('chooseModeSubtitle', language)}</p>
         </div>
 
-        {/* CTA Buttons */}
-        <div className="grid lg:grid-cols-3 gap-8 max-w-6xl w-full">
+        {/* CTA Buttons - Updated to 2x2 Grid */}
+        <div className="grid lg:grid-cols-2 gap-8 max-w-5xl w-full">
+          {/* Quick Mode */}
           <div className="bg-gradient-to-br from-orange-500/20 to-pink-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-2">
             <div className="flex items-center mb-4">
               <Clock className="w-8 h-8 text-orange-400 mr-3" />
@@ -103,6 +104,7 @@ const LandingPage: React.FC = () => {
             </button>
           </div>
 
+          {/* Cinema Mode */}
           <div className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-2">
             <div className="flex items-center mb-4">
               <Film className="w-8 h-8 text-purple-400 mr-3" />
@@ -123,6 +125,7 @@ const LandingPage: React.FC = () => {
             </button>
           </div>
           
+          {/* Deep Mode */}
           <div className="bg-gradient-to-br from-teal-500/20 to-blue-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-2">
             <div className="flex items-center mb-4">
               <Target className="w-8 h-8 text-teal-400 mr-3" />
@@ -140,6 +143,27 @@ const LandingPage: React.FC = () => {
               className="w-full bg-gradient-to-r from-teal-500 to-blue-500 text-white font-semibold py-4 px-8 rounded-2xl hover:from-teal-600 hover:to-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl"
             >
               {t('startDeep', language)}
+            </button>
+          </div>
+
+          {/* Book Inspirations Mode - NEW */}
+          <div className="bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/10 hover:border-white/20 transition-all duration-300 transform hover:-translate-y-2">
+            <div className="flex items-center mb-4">
+              <BookMarked className="w-8 h-8 text-emerald-400 mr-3" />
+              <h4 className="text-2xl font-bold">{t('bookInspirations', language)}</h4>
+            </div>
+            <p className="text-blue-200 mb-6 text-lg">{t('bookInspirationsDesc', language)}</p>
+            <ul className="text-blue-200 mb-8 space-y-2">
+              <li>• {t('bookInspirationsFeatures.feature1', language)}</li>
+              <li>• {t('bookInspirationsFeatures.feature2', language)}</li>
+              <li>• {t('bookInspirationsFeatures.feature3', language)}</li>
+              <li>• {t('bookInspirationsFeatures.feature4', language)}</li>
+            </ul>
+            <button
+              onClick={() => handleModeSelection('bookInspiration')}
+              className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold py-4 px-8 rounded-2xl hover:from-emerald-600 hover:to-cyan-600 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl"
+            >
+              {t('startBookInspiration', language)}
             </button>
           </div>
         </div>

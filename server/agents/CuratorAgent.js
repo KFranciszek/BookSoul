@@ -55,7 +55,7 @@ export class CuratorAgent {
     const language = isPolish ? 'Polish' : 'English';
     
     // Shortened prompt for better performance
-    let prompt = `As a literary expert, create ${mode === 'quick' ? '4-5' : mode === 'cinema' ? '3-4' : '6-7'} REAL book recommendations.
+    let prompt = `As a literary expert, create ${mode === 'quick' ? '4-5' : mode === 'cinema' ? '3-4' : mode === 'bookInspiration' ? '4-5' : '6-7'} REAL book recommendations.
 
 USER PROFILE:
 - Emotional State: ${userProfile.emotionalState}
@@ -70,6 +70,12 @@ USER PROFILE:
 - Film Connection: ${surveyData.filmConnection || 'Not specified'}
 
 Focus on books with cinematic qualities that match their film preferences.
+`;
+    } else if (mode === 'bookInspiration') {
+      prompt += `
+- Favorite Books: ${surveyData.favoriteBooks?.map(book => `"${book.title}" (loved because: ${book.whyLoved})`).join(', ')}
+
+Focus on books similar to their favorites, analyzing what they loved about each book and finding books with similar qualities.
 `;
     } else {
       prompt += `

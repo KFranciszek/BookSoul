@@ -19,7 +19,8 @@ export class ProfilerAgent {
         agent: this.name,
         surveyMode: surveyData.surveyMode,
         hasGenres: !!surveyData.favoriteGenres?.length,
-        hasFilms: !!surveyData.favoriteFilms?.length
+        hasFilms: !!surveyData.favoriteFilms?.length,
+        hasBooks: !!surveyData.favoriteBooks?.length
       }
     );
     
@@ -76,6 +77,17 @@ Analyze their cinematic preferences and create a psychological profile focusing 
 3. Character development preferences
 4. Visual storytelling appreciation
 5. Genre crossover potential from screen to page
+`;
+    } else if (mode === 'bookInspiration') {
+      prompt += `
+Favorite Books: ${surveyData.favoriteBooks?.map(book => `"${book.title}" (loved because: ${book.whyLoved})`).join(', ') || 'Not specified'}
+
+Analyze their book preferences and create a psychological profile focusing on:
+1. Literary taste patterns and preferences
+2. Emotional connection to storytelling
+3. Thematic interests and recurring motifs
+4. Writing style preferences
+5. Character and narrative structure preferences
 `;
     } else {
       prompt += `
@@ -162,6 +174,23 @@ Return as JSON with these fields:
       };
     }
     
+    if (mode === 'bookInspiration') {
+      return {
+        emotionalState: 'Seeking books similar to beloved favorites',
+        cognitiveStyle: 'Pattern-recognition and similarity-focused',
+        personalityTraits: ['book-lover', 'pattern-seeking', 'emotionally connected'],
+        readingMotivation: 'Finding new books that capture the magic of favorites',
+        therapeuticNeeds: 'Comfort through familiar yet fresh narratives',
+        preferredNarrativeStyle: 'Similar to established preferences',
+        complexityLevel: 'medium',
+        emotionalTolerance: 'medium',
+        surveyMode: mode,
+        rawSurveyData: surveyData,
+        profileGeneratedAt: new Date().toISOString(),
+        confidence: 0.7
+      };
+    }
+    
     return {
       emotionalState: surveyData.currentMood || 'neutral',
       cognitiveStyle: 'balanced',
@@ -188,6 +217,7 @@ Return as JSON with these fields:
     // Specific mode bonuses
     if (surveyData.surveyMode === 'deep') confidence += 0.1;
     if (surveyData.surveyMode === 'cinema' && surveyData.favoriteFilms?.length >= 2) confidence += 0.1;
+    if (surveyData.surveyMode === 'bookInspiration' && surveyData.favoriteBooks?.length >= 3) confidence += 0.15;
     
     return Math.min(confidence, 0.95);
   }

@@ -3,6 +3,9 @@ import { logger } from '../utils/logger.js';
 
 export class SurveySessionService {
   constructor() {
+    // ALWAYS initialize sessions Map - needed for bookInspiration mode
+    this.sessions = new Map();
+    
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
@@ -20,7 +23,6 @@ export class SurveySessionService {
       logger.warn('⚠️ Supabase not configured - using in-memory storage');
       this.useInMemoryStorage = true;
       this.supabase = null;
-      this.sessions = new Map(); // In-memory storage
     } else {
       try {
         this.supabase = createClient(supabaseUrl, supabaseKey);
@@ -30,12 +32,17 @@ export class SurveySessionService {
         logger.error('❌ Failed to initialize Supabase client:', error.message);
         this.useInMemoryStorage = true;
         this.supabase = null;
-        this.sessions = new Map();
       }
     }
   }
 
   async createSession({ surveyData, recommendations, userEmail }) {
+    // FORCE in-memory storage for bookInspiration mode
+    if (surveyData.surveyMode === 'bookInspiration') {
+      logger.info('📚 BookInspiration mode detected - using in-memory storage only');
+      return this.createInMemorySession({ surveyData, recommendations, userEmail });
+    }
+
     if (this.useInMemoryStorage) {
       return this.createInMemorySession({ surveyData, recommendations, userEmail });
     }
@@ -99,6 +106,11 @@ export class SurveySessionService {
   }
 
   async submitRating(sessionId, bookId, rating) {
+    // For bookInspiration sessions, always use in-memory storage
+    if (sessionId.startsWith('mem_')) {
+      return this.submitInMemoryRating(sessionId, bookId, rating);
+    }
+
     if (this.useInMemoryStorage) {
       return this.submitInMemoryRating(sessionId, bookId, rating);
     }
@@ -159,6 +171,11 @@ export class SurveySessionService {
   }
 
   async getSession(sessionId) {
+    // For bookInspiration sessions (in-memory), check memory first
+    if (sessionId.startsWith('mem_')) {
+      return this.sessions.get(sessionId) || null;
+    }
+
     if (this.useInMemoryStorage) {
       return this.sessions.get(sessionId) || null;
     }
